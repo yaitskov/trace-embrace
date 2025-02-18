@@ -1,0 +1,33 @@
+cabal-version:   3.0
+name:            trace-if
+version:         0.0.1
+license:         BSD-3-Clause
+license-file:    LICENSE
+category:        Development
+author:          Daniil Iaitskov <dyaitskov@gmail.com>
+maintainer:      Daniil Iaitskov <dyaitskov@gmail.com>
+stability:       experimental
+synopsis:        Conditional Debug.Trace controlled via environment variable
+homepage:        https://github.com/yaitskov/trace-if
+bug-reports:     https://github.com/yaitskov/trace-if/issues
+build-type:      Simple
+description:
+  Minimize routine with commenting\uncommenting traces
+  during active debugging. NOTRACE environment variable
+  disables traces.
+
+tested-with:
+  GHC == 9.10.1
+
+library
+  build-depends: base < 5
+  exposed-modules: Debug.TraceIf
+  ghc-options: -O2 -Wall
+  hs-source-dirs: src
+  default-language: Haskell2010
+  default-extensions:
+    ImportQualifiedPost
+
+source-repository head
+  type:     git
+  location: https://github.com/yaitskov/trace-if.git
