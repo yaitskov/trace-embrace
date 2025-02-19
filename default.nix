@@ -25,7 +25,7 @@ let
   ];
 
   base = hsPkgs.callCabal2nix "trace-if" (lib.sourceByRegex ./. sources) { };
-  trace-if-overlay = _hf: _hp: { trace-ifc = base; };
+  trace-if-overlay = _hf: _hp: { trace-if = base; };
   baseHaskellPkgs = pkgs.haskell.packages.${ghc};
   hsOverlays = [ hsPkgSetOverlay trace-if-overlay ];
   hsPkgs = baseHaskellPkgs.override (old: {
@@ -51,7 +51,7 @@ let
     '';
   };
 
-  trace-if = hsPkgs.trace-ifc;
+  trace-if = hsPkgs.trace-if;
 in {
   inherit hsPkgs;
   inherit ghc;
