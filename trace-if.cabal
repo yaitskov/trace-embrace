@@ -12,9 +12,36 @@ homepage:        https://github.com/yaitskov/trace-if
 bug-reports:     https://github.com/yaitskov/trace-if/issues
 build-type:      Simple
 description:
-  Minimize routine with commenting\uncommenting traces
-  during active debugging. NOTRACE environment variable
-  disables traces.
+  Minimize the hassle of writing and maintaining traces in your codebase.
+
+  There are several issues with functions from standand GHC module "Debug.Trace":
+
+  * no trace emitting location
+  * tracing multiple values requires to write boilerplate code
+  * no way to quickly disable tracing without recompilation
+  * no way to keep tracing in source code withou affecting production code
+
+  === Example
+
+  @
+  {-# LANGUAGE TemplateHaskell #-}
+  module Foo where
+  import Debug.TraceIf
+  foo x y z = $(tw "foo get/x y z") (x + y + z)
+
+  module Main
+  import Foo
+  main = putStrLn (foo 1 2 3)
+  @
+
+  Trace line for the snippet above would be:
+
+  @
+    3:Foo foo get; x: 1; y: 2; z: 3 => 6
+  @
+
+  \"NOTRACE\" environment variable disables traces at runtime and
+  removes tracing code completely at compile time.
 
 tested-with:
   GHC == 9.10.1
