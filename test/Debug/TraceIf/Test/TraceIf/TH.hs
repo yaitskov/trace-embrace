@@ -1,9 +1,9 @@
-{-# LANGUAGE TemplateHaskell #-}
-
+{-# LANGUAGE OverloadedStrings, TemplateHaskell #-}
 module Debug.TraceIf.Test.TraceIf.TH where
 
 import Debug.TraceIf
 import Test.Tasty.HUnit
+import Data.ByteString.Lazy
 
 unit_empty_var_list :: IO ()
 unit_empty_var_list =
@@ -25,3 +25,9 @@ unit_string =
   " 25:Debug.TraceIf.Test.TraceIf.TH bye; x: \"abc\""  @=? $(svars "bye/x")
   where
     x = "abc" :: String
+
+unit_show_trace :: IO ()
+unit_show_trace =
+  " 31:Debug.TraceIf.Test.TraceIf.TH ; x: [\"ab\",\"c\"]"  @=? $(svars "/#x")
+  where
+    x = ("ab" <> "c") :: ByteString

@@ -2,6 +2,7 @@ module Debug.TraceIf (trace, traceWith, module TT) where
 
 import Debug.Trace qualified as T
 import Debug.TraceIf.TH as TT
+import Debug.TraceIf.Show as TT
 import System.Environment (lookupEnv)
 import System.IO.Unsafe (unsafeDupablePerformIO)
 

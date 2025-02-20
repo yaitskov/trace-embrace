@@ -20,12 +20,20 @@ tested-with:
   GHC == 9.10.1
 
 library
-  build-depends: base < 5, template-haskell
-  exposed-modules: Debug.TraceIf, Debug.TraceIf.TH
+  build-depends:
+    base < 5,
+    bytestring,
+    template-haskell
+  exposed-modules:
+    Debug.TraceIf
+    Debug.TraceIf.TH
+    Debug.TraceIf.Show
   ghc-options: -O2 -Wall
   hs-source-dirs: src
   default-language: Haskell2010
   default-extensions:
+    FlexibleContexts
+    FlexibleInstances
     ImportQualifiedPost
     LambdaCase
     ScopedTypeVariables
@@ -46,6 +54,7 @@ test-suite test
   ghc-options: -Wall -dynamic -rtsopts -threaded -main-is Driver
   build-depends:
       base
+    , bytestring
     , tasty
     , tasty-discover
     , tasty-hunit
