@@ -31,3 +31,17 @@ unit_show_trace =
   " 31:Debug.TraceIf.Test.TraceIf.TH ; x: [\"ab\",\"c\"]"  @=? $(svars "/#x")
   where
     x = ("ab" <> "c") :: ByteString
+
+unit_show_and_show_trace :: IO ()
+unit_show_and_show_trace =
+  " 37:Debug.TraceIf.Test.TraceIf.TH ; y: True; x: [\"ab\",\"c\"]"  @=? $(svars "/y#x")
+  where
+    x = ("ab" <> "c") :: ByteString
+    y = True
+
+unit_show_2_vars :: IO ()
+unit_show_2_vars =
+  " 44:Debug.TraceIf.Test.TraceIf.TH ; y: True; x: \"abc\""  @=? $(svars "/y x")
+  where
+    x = ("ab" <> "c") :: ByteString
+    y = True
