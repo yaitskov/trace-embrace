@@ -19,7 +19,7 @@ let
 
   sources = [
     "^src.*$"
-    "^tests.*$"
+    "^test.*$"
     "^LICENSE.*$"
     "^.*\\.cabal$"
   ];
