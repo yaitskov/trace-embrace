@@ -45,3 +45,13 @@ unit_show_2_vars =
   where
     x = ("ab" <> "c") :: ByteString
     y = True
+
+prop_tr :: Int -> Bool
+prop_tr x = x == foo x
+  where
+    foo = $(tr "foo get/x")
+
+prop_tw :: Int -> Bool
+prop_tw x = x == foo x
+  where
+    foo = $(tw "foo get/x")

@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
-module Debug.TraceIf.TH where
+module Debug.TraceIf.TH (svars, tr, tw) where
 
+import Debug.TraceIf.If
 import Debug.TraceIf.Show
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
@@ -9,10 +10,28 @@ import Text.Printf
 showTrace :: Show (ShowTrace a) => a -> String
 showTrace = show . ShowTrace
 
--- | Interpolate vars in the arugment, prepend with location
--- Generate expression type is 'String'.
+-- | Interpolate vars in the arugment and prepend with TH splice location
+-- Generated expression has type 'String'.
 -- The argument has literal and interpolated parts.
 -- There parts are separated with right slash (/)
+-- @
+--    foo x y = trace $(svars "foo get/x y") x
+-- @
+-- The snippet above is expanded into:
+-- @
+--    foo x y = trace (" 99:Main foo get; x: " <> show x <> "; y: " <> show y) x
+-- @
+-- Show instance of some types (eg lazy ByteString) hide
+-- internal structure which might be important in low level code.
+-- Variables after # are wrapped into 'ShowTrace':
+-- @
+--    import Data.ByteString.Lazy
+--    foo x = trace $(svars "foo get/x#x") x
+-- @
+-- The snippet above is expanded into:
+-- @
+--    foo x = trace (" 99:Main foo get; x: " <> show x <> "; x: " <> show (ShowTrace y)) x
+-- @
 svars :: String -> Q Exp
 svars s = do
   l :: String <- locToStr literalPart <$> location
@@ -39,3 +58,30 @@ svars s = do
               [| $(lift vs) |]
             Just vn ->
               [|"; " <> $(lift vs) <> ": " <> $(varE f) $(varE vn)|]
+
+-- | TH version of 'trace'
+-- The argument is processed with 'svars'.
+-- Generated expression has type @a -> a@.
+-- 'id' is generated if NOTRACE environment variable is defined.
+-- Example:
+-- @
+--     foo x = $(tr "foo get/x") x
+-- @
+-- Expanded into:
+-- @
+--     foo x = trace $(svars "foo get/x") x
+-- @
+tr :: String -> Q Exp
+tr s
+  | isTracingEnabled = [|trace $(svars s)|]
+  | otherwise = [|id|]
+
+-- | TH version of 'traceWith'
+-- The argument is processed with 'svars'.
+-- Generated expression has type @Show a => a -> a@.
+-- 'id' is generated if NOTRACE environment variable is defined.
+
+tw :: String -> Q Exp
+tw s
+  | isTracingEnabled = [|traceWith ((($(svars s) <> " => ") <>) . show) |]
+  | otherwise = [|id|]
