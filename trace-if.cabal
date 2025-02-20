@@ -49,7 +49,7 @@ tested-with:
 library
   build-depends:
     base < 5,
-    bytestring,
+    bytestring > 0.11,
     template-haskell
   exposed-modules:
     Debug.TraceIf
