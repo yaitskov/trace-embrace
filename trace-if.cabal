@@ -66,15 +66,15 @@ tested-with:
 library
   build-depends:
     base < 5,
-    bytestring > 0.11,
-    template-haskell
+    bytestring > 0.11 && < 0.12.3,
+    template-haskell < 2.24.0.0,
   exposed-modules:
     Debug.TraceIf
     Debug.TraceIf.If
     Debug.TraceIf.Show
     Debug.TraceIf.TH
 
-  ghc-options: -O2 -Wall
+  ghc-options: -Wall
   hs-source-dirs: src
   default-language: Haskell2010
   default-extensions:
