@@ -75,3 +75,24 @@ foo bs = $(tr "foo get/bs#bs") bs
 A trace line for the snippet above would be:
 
 >  11:Foo foo get; bs: "abc"; bs: ["ab", "c"]
+
+
+### Pattern matching syntax
+
+Template tracing functions support Haskell pattern syntax and comments, so
+function arguments can be quickly copy-pasted as-is:
+
+```haskell
+{-# LANGUAGE TemplateHaskell #-}
+module Foo where
+
+import Debug.TraceIf
+
+foo :: Maybe ([Int], Int) -> Int
+foo v@(Just ([x], {-ignore-} _)) = $(tr "foo get/v@(Just ([x], {-ignore-} _))") x
+foo _ = 0
+```
+
+A trace line for the snippet above would be:
+
+>   7:Foo foo get; v: Just 1; x: 1

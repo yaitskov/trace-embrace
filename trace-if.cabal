@@ -1,6 +1,6 @@
 cabal-version:   3.0
 name:            trace-if
-version:         0.0.1
+version:         0.0.2
 license:         BSD-3-Clause
 license-file:    LICENSE
 category:        Development
@@ -21,20 +21,17 @@ description:
   * no way to quickly disable tracing without recompilation
   * no way to keep tracing in source code withou affecting production code
 
-  === Example
+  == Examples
+  === TH
 
   @
   {-# LANGUAGE TemplateHaskell #-}
   module Foo where
   import Debug.TraceIf
   foo x y z = $(tw "foo get/x y z") (x + y + z)
-
-  module Main
-  import Foo
-  main = putStrLn (foo 1 2 3)
   @
 
-  Trace line for the snippet above would be:
+  Trace line for @foo 1 2 3@ would be:
 
   @
     3:Foo foo get; x: 1; y: 2; z: 3 => 6
@@ -42,6 +39,26 @@ description:
 
   \"NOTRACE\" environment variable disables traces at runtime and
   removes tracing code completely at compile time.
+
+  === Pattern matching
+
+  Template tracing functions support Haskell pattern syntax and comments, so
+  function arguments can be quickly copy-pasted as-is:
+
+  @
+  {-# LANGUAGE TemplateHaskell #-}
+  module Foo where
+
+  import Debug.TraceIf
+
+  foo :: Maybe ([Int], Int) -> Int
+  foo v@(Just ([x], {-ignore-} _)) = $(tr "foo get/v@(Just ([x], {-ignore-} _))") x
+  foo _ = 0
+  @
+
+  A trace line for @foo ([1], 2)@ would be:
+
+  >   7:Foo foo get; v: Just 1; x: 1
 
 tested-with:
   GHC == 9.10.1
