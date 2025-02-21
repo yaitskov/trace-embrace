@@ -3,23 +3,24 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedNewtypes #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 -- | More detailed Show for debugging
 -- E.g. show instance of lazy ByteString hides how many
 -- chunks in the string.
-module Debug.TraceIf.Show where
+module Debug.TraceIf.Show (module STh, ShowTrace (..)) where
 
 import Data.ByteString.Lazy.Internal qualified as L
 import Data.ByteString.Internal (ByteString(..))
+import Debug.TraceIf.ShowTh as STh
 import GHC.Exts
 import Prelude hiding (Show (..))
 import Prelude qualified as P
 
--- | Levity polymorphic version 'P.Show'.
-class Show (t :: TYPE r) where
-  show :: t -> String
 
 -- | Wrap value which has opaque 'Show' instance.
 newtype ShowTrace a = ShowTrace { unShowTrace :: a }
@@ -54,6 +55,24 @@ instance Show Double# where
 
 instance Show Addr# where
   show i# = P.show (Ptr @() i#) <> "#"
+
+instance (Show a#) => Show (# a# #) where
+  show (# a# #) = "(# " <> show a# <> " #)"
+
+$(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
+   in concat <$> sequence [ show1 ut | ut <- utypes ])
+
+instance (Show a#, Show b#) => Show (# a#, b# #) where
+  show (# a#, b# #) = "(# " <> show a# <> ", " <> show b# <> " #)"
+
+$(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
+   in concat <$> sequence [ show2 ut ut' | ut <- utypes, ut' <- utypes ])
+
+instance (Show a, Show b, Show c) => Show (# a, b, c #) where
+  show (# a, b, c #) = "(# " <> show a <> ", " <> show b <> ", " <> show c <> " #)"
+
+$(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
+   in concat <$> sequence [ show3 ut ut' ut'' | ut <- utypes, ut' <- utypes, ut'' <- utypes ])
 
 instance P.Show a => Show a where
   show = P.show

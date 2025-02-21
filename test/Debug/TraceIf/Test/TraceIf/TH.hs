@@ -4,6 +4,9 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE FlexibleContexts #-}
+
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Debug.TraceIf.Test.TraceIf.TH where
 
@@ -23,7 +26,7 @@ two = 2
 
 unit_traceMessage :: IO ()
 unit_traceMessage =
-  (" 26:Debug.TraceIf.Test.TraceIf.TH " :: String) @=? $(traceMessage)
+  (" 29:Debug.TraceIf.Test.TraceIf.TH " :: String) @=? $(traceMessage)
 
 unit_svarsWith :: IO ()
 unit_svarsWith =
@@ -153,3 +156,10 @@ unit_trace_ret_unboxed_int :: IO ()
 unit_trace_ret_unboxed_int = one @=? foo one
   where
     foo (I# x#) = (I# ($(tr "foo/(I# x#)") x#))
+
+unit_unboxed_tuple :: IO ()
+unit_unboxed_tuple = expec @=? foo (# 1#, 2# #)
+  where
+    expec :: String = "foo; t: (# 1#, 2# #) => 1#"
+    foo :: (# Int#, Int# #) -> String
+    foo t@(# x#, _ #) = $(svarsWith "foo/t") x#

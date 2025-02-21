@@ -90,6 +90,7 @@ library
     Debug.TraceIf
     Debug.TraceIf.If
     Debug.TraceIf.Show
+    Debug.TraceIf.ShowTh
     Debug.TraceIf.TH
 
   ghc-options: -Wall
