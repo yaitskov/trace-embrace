@@ -8,6 +8,7 @@ import Debug.TraceIf.If
 import Debug.TraceIf.Show
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
+import Prelude hiding (Show (..))
 import Text.Printf
 
 showTrace :: Show (ShowTrace a) => a -> String
@@ -74,11 +75,11 @@ foo x y = trace ("foo get; x: " <> show x <> "; y: " <> show y) x
 
 'Show' instance of some types (eg lazy ByteString) hide
 internal structure which might be important in low level code.
-Variables after "#" are wrapped into t'ShowTrace':
+Variables after ";" are wrapped into t'ShowTrace':
 
 @
 import Data.ByteString.Lazy
-foo x = trace $(svars "foo get/x#x") x
+foo x = trace $(svars "foo get/x;x") x
 @
 
 The snippet above is expanded into:
@@ -92,8 +93,8 @@ svars :: String -> Q Exp
 svars s = do
   case interpolatePart of
     '/':vars ->
-      case span ('#' /=) vars of
-        (showVars, '#' : traceVars) ->
+      case span (';' /=) vars of
+        (showVars, ';' : traceVars) ->
           [|(mconcat
             ($(lift literalPart) :
               $(listE (wordsToVars 'show showVars

@@ -3,5 +3,5 @@
 -- instead of "Debug.TraceIf".
 module Debug.TraceIf (module TT) where
 
-import Debug.TraceIf.Show as TT
+import Debug.TraceIf.Show as TT hiding (Show (..))
 import Debug.TraceIf.TH as TT

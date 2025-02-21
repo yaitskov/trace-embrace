@@ -69,7 +69,7 @@ import Data.ByteString.Lazy
 --   show ...
 
 foo :: ByteString -> ByteString
-foo bs = $(tr "foo get/bs#bs") bs
+foo bs = $(tr "foo get/bs;bs") bs
 ```
 
 A trace line for the snippet above would be:
@@ -96,3 +96,21 @@ foo _ = 0
 A trace line for the snippet above would be:
 
 >   7:Foo foo get; v: Just 1; x: 1
+
+### Unlifted vars
+
+```haskell
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE MagicHash #-}
+module Foo where
+
+import Debug.TraceIf
+import GHC.Exts
+
+foo :: Int -> ()
+foo (I# x#) = $(tr "foo get/x#") ()
+```
+
+A trace line for the snippet above would be:
+
+>   7:Foo foo get; x#: 1#

@@ -60,6 +60,24 @@ description:
 
   >   7:Foo foo get; v: Just 1; x: 1
 
+  === Unlifted vars
+
+  @
+  {-# LANGUAGE TemplateHaskell #-}
+  {-# LANGUAGE MagicHash #-}
+  module Foo where
+
+  import Debug.TraceIf
+  import GHC.Exts
+
+  foo :: Int -> ()
+  foo (I# x#) = $(tr "foo get/x#") ()
+  @
+
+  A trace line for @foo 1@ would be:
+
+  >   7:Foo foo get; x#: 1#
+
 tested-with:
   GHC == 9.10.1
 
@@ -96,6 +114,7 @@ test-suite test
   hs-source-dirs:
     test
   default-extensions:
+    ImportQualifiedPost
     ScopedTypeVariables
   ghc-options: -Wall -dynamic -rtsopts -threaded -main-is Driver
   build-depends:
