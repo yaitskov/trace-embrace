@@ -138,3 +138,18 @@ unit_unboxed_int :: IO ()
 unit_unboxed_int = "foo; x#: 1#" @=? foo one
   where
     foo (I# x#) = $(svars "foo/(I# x#)")
+
+unit_ret_unboxed_int :: IO ()
+unit_ret_unboxed_int = "foo; x#: 1# => 1#" @=? foo one
+  where
+    foo (I# x#) = $(svarsWith "foo/(I# x#)") x#
+
+unit_traceWith_unboxed_int :: IO ()
+unit_traceWith_unboxed_int = one @=? foo one
+  where
+    foo (I# x#) = (I# ($(tw "foo/(I# x#)") x#))
+
+unit_trace_ret_unboxed_int :: IO ()
+unit_trace_ret_unboxed_int = one @=? foo one
+  where
+    foo (I# x#) = (I# ($(tr "foo/(I# x#)") x#))

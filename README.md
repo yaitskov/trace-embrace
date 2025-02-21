@@ -34,22 +34,6 @@ A trace line for the snippet above would be:
 
 >   7:Foo foo get; x: 1; y: 2; z: 3 => 6
 
-### traceWith without TH
-
-```haskell
-module Foo where
-
-import Debug.TraceIf.If
-
-foo :: Int -> Int -> Int -> Int
-foo x y z =
-  traceWith ((("foo get; x: " <> show x <>
-                    "; y: " <> show y <>
-                    "; z: " <> show z <>
-                    " => ") <>) . show)
-    (x + y + z)
-```
-
 ### trace lazy ByteString structure
 
 ByteString Show instance does not show chunks, but it can be important
@@ -107,8 +91,8 @@ module Foo where
 import Debug.TraceIf
 import GHC.Exts
 
-foo :: Int -> ()
-foo (I# x#) = $(tr "foo get/x#") ()
+foo :: Int -> Int
+foo (I# x#) = (I# ($(tr "foo get/x#") x#))
 ```
 
 A trace line for the snippet above would be:

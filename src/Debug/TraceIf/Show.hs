@@ -1,9 +1,10 @@
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE UnliftedNewtypes #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UnliftedNewtypes #-}
 
 -- | More detailed Show for debugging
 -- E.g. show instance of lazy ByteString hides how many
@@ -50,6 +51,9 @@ instance Show Word# where
 
 instance Show Double# where
   show i# = P.show (D# i#) <> "#"
+
+instance Show Addr# where
+  show i# = P.show (Ptr @() i#) <> "#"
 
 instance P.Show a => Show a where
   show = P.show

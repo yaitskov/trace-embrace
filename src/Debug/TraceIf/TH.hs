@@ -4,6 +4,7 @@
 module Debug.TraceIf.TH (svars, tr, tw, svarsWith, traceMessage) where
 
 import Data.Char as C
+import Debug.Trace qualified as T
 import Debug.TraceIf.If
 import Debug.TraceIf.Show
 import Language.Haskell.TH
@@ -120,7 +121,7 @@ svars s = do
 
 -- | Suffix 'svars' with return value.
 svarsWith :: String -> Q Exp
-svarsWith s = [| ((($(svars s) <> " => ") <>) . show) :: Show a => a -> String |]
+svarsWith s = [| \x -> ((($(svars s) <> " => ") <>) (show x)) {-:: (Rewrap a b, Show a) => a -> String-} |]
 
 -- | Splice location.
 traceMessage :: Q Exp
@@ -131,7 +132,7 @@ traceMessage = lift =<< locToStr <$> location
 
 -- | TH version of 'trace'
 -- The argument is processed with 'svars'.
--- Generated expression has type @a -> a@.
+-- Generated expression has type @forall r (a :: TYPE r) b a. Rewrap a b => a -> a@.
 -- 'id' is generated if \"NOTRACE\" environment variable is not defined.
 -- Example:
 --
@@ -139,14 +140,24 @@ traceMessage = lift =<< locToStr <$> location
 --
 tr :: String -> Q Exp
 tr s
-  | isTracingEnabled = [| (trace ($(traceMessage) <> $(svars s))) :: a -> a |]
+  | isTracingEnabled =
+    [| \x ->
+        if isTracingEnabled
+        then unwrap (T.trace ($(traceMessage) <> $(svars s)) (wrap x))
+        else x
+     |]
   | otherwise = [|id|]
 
 -- | TH version of 'traceWith'
 -- The argument is processed with 'svarsWith'.
--- Generated expression has type @Show a => a -> a@.
+-- Generated expression has type @forall r (a :: TYPE r) b a. (Show a, Rewrap a b) => a -> a@.
 -- 'id' is generated if \"NOTRACE\" environment variable is defined.
 tw :: String -> Q Exp
 tw s
-  | isTracingEnabled = [| (traceWith (($(traceMessage) <>) . $(svarsWith s))) :: Show a => a -> a |]
+  | isTracingEnabled =
+    [| \x ->
+        if isTracingEnabled
+        then unwrap (T.trace ($(traceMessage) <> $(svarsWith s) x) (wrap x))
+        else x
+     |]
   | otherwise = [|id|]

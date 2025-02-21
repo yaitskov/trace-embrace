@@ -1,7 +1,15 @@
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
+
 -- | "Debug.Trace" functions protected with environment variable.
 module Debug.TraceIf.If where
 
-import Debug.Trace qualified as T
+import GHC.Exts
 import System.Environment (lookupEnv)
 import System.IO.Unsafe (unsafeDupablePerformIO)
 
@@ -9,16 +17,34 @@ import System.IO.Unsafe (unsafeDupablePerformIO)
 isTracingEnabled :: Bool
 isTracingEnabled = unsafeDupablePerformIO (lookupEnv "NOTRACE") == Nothing
 
--- | Wrapper around 'T.trace'.
--- It is not called if \"NOTRACE\" environment variable is defined.
-trace :: String -> a -> a
-trace
-  | isTracingEnabled = T.trace
-  | otherwise = flip const
+class Rewrap (t :: TYPE r) b | t -> b where
+  wrap :: t -> b
+  unwrap :: b -> t
 
--- | Wrapper around 'T.traceWith'.
--- It is not called if \"NOTRACE\" environment variable is defined.
-traceWith :: (a -> String) -> a -> a
-traceWith
-  | isTracingEnabled = T.traceWith
-  | otherwise = flip const
+instance Rewrap Int# Int where
+  wrap = I#
+  unwrap (I# x#) = x#
+
+instance Rewrap Double# Double where
+  wrap = D#
+  unwrap (D# x#) = x#
+
+instance Rewrap Float# Float where
+  wrap = F#
+  unwrap (F# x#) = x#
+
+instance Rewrap Addr# (Ptr ()) where
+  wrap = Ptr
+  unwrap (Ptr x#) = x#
+
+instance Rewrap Char# Char where
+  wrap = C#
+  unwrap (C# x#) = x#
+
+instance Rewrap Word# Word where
+  wrap = W#
+  unwrap (W# x#) = x#
+
+instance Rewrap a a where
+  wrap = id
+  unwrap = id
