@@ -60,19 +60,19 @@ instance (Show a#) => Show (# a# #) where
   show (# a# #) = "(# " <> show a# <> " #)"
 
 $(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
-   in concat <$> sequence [ show1 ut | ut <- utypes ])
+   in concat <$> sequence [ deriveShowTuple1 ut | ut <- utypes ])
 
-instance (Show a#, Show b#) => Show (# a#, b# #) where
+instance (Show a, Show b) => Show (# a, b #) where
   show (# a#, b# #) = "(# " <> show a# <> ", " <> show b# <> " #)"
 
 $(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
-   in concat <$> sequence [ show2 ut ut' | ut <- utypes, ut' <- utypes ])
+   in concat <$> sequence [ deriveShowTuple2 ut ut' | ut <- utypes, ut' <- utypes ])
 
 instance (Show a, Show b, Show c) => Show (# a, b, c #) where
   show (# a, b, c #) = "(# " <> show a <> ", " <> show b <> ", " <> show c <> " #)"
 
 $(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
-   in concat <$> sequence [ show3 ut ut' ut'' | ut <- utypes, ut' <- utypes, ut'' <- utypes ])
+   in concat <$> sequence [ deriveShowTuple3 ut ut' ut'' | ut <- utypes, ut' <- utypes, ut'' <- utypes ])
 
 instance P.Show a => Show a where
   show = P.show

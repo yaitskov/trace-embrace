@@ -163,3 +163,10 @@ unit_unboxed_tuple = expec @=? foo (# 1#, 2# #)
     expec :: String = "foo; t: (# 1#, 2# #) => 1#"
     foo :: (# Int#, Int# #) -> String
     foo t@(# x#, _ #) = $(svarsWith "foo/t") x#
+
+prop_ret_unboxed_tuple :: Bool
+prop_ret_unboxed_tuple = isTrue# (1# ==# foo t)
+  where
+    t = (# 1#, 2# #)
+    foo :: (# Int#, Int# #) -> Int#
+    foo tt@(# x#, _ #)  = $(tw "foo/tt") x#

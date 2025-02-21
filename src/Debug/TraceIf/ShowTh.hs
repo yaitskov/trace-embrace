@@ -17,20 +17,27 @@ import Prelude hiding (Show (..))
 class Show (t :: TYPE r) where
   show :: t -> String
 
-show1 :: Name -> Q [Dec]
-show1 a = [d|
+-- | https://gitlab.haskell.org/ghc/ghc/-/issues/25776
+deriveShowTuple1 :: Name -> Q [Dec]
+deriveShowTuple1 a = [d|
   instance Show (# $(conT a) #) where
     show (# a# #) = "(# " <> show a# <> " #)"
   |]
 
-show2 :: Name -> Name -> Q [Dec]
-show2 a b = [d|
+deriveShowTuple2 :: Name -> Name -> Q [Dec]
+deriveShowTuple2 a b = [d|
   instance Show (# $(conT a), $(conT b) #) where
     show (# a#, b# #) = "(# " <> show a# <> ", " <> show b# <> " #)"
   |]
 
-show3 :: Name -> Name -> Name -> Q [Dec]
-show3 a b c = [d|
+deriveShowTuple3 :: Name -> Name -> Name -> Q [Dec]
+deriveShowTuple3 a b c = [d|
   instance Show (# $(conT a), $(conT b), $(conT c) #) where
     show (# a#, b#, c# #) = "(# " <> show a# <> ", " <> show b# <> ", " <> show c# <> " #)"
+  |]
+
+deriveShowTuple4 :: Name -> Name -> Name -> Name -> Q [Dec]
+deriveShowTuple4 a b c d = [d|
+  instance Show (# $(conT a), $(conT b), $(conT c), $(conT d) #) where
+    show (# a#, b#, c#, d# #) = "(# " <> show a# <> ", " <> show b# <> ", " <> show c# <> ", " <> show d# <> " #)"
   |]
