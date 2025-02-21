@@ -5,6 +5,7 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE UnboxedSums #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedNewtypes #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
@@ -56,6 +57,9 @@ instance Show Double# where
 instance Show Addr# where
   show i# = P.show (Ptr @() i#) <> "#"
 
+instance Show (# #) where
+  show _ = "(# #)"
+
 instance (Show a#) => Show (# a# #) where
   show (# a# #) = "(# " <> show a# <> " #)"
 
@@ -65,14 +69,14 @@ $(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
 instance (Show a, Show b) => Show (# a, b #) where
   show (# a#, b# #) = "(# " <> show a# <> ", " <> show b# <> " #)"
 
-$(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
-   in concat <$> sequence [ deriveShowTuple2 ut ut' | ut <- utypes, ut' <- utypes ])
+$(concat <$> sequence [ deriveShowTuple2 ut ut' | ut <- unTypes, ut' <- unTypes ])
+$(concat <$> sequence [ deriveShowSum2 ut ut' | ut <- unTypes, ut' <- unTypes ])
 
 instance (Show a, Show b, Show c) => Show (# a, b, c #) where
   show (# a, b, c #) = "(# " <> show a <> ", " <> show b <> ", " <> show c <> " #)"
 
-$(let utypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]
-   in concat <$> sequence [ deriveShowTuple3 ut ut' ut'' | ut <- utypes, ut' <- utypes, ut'' <- utypes ])
+$(concat <$> sequence [ deriveShowTuple3 ut ut' ut'' | ut <- unTypes, ut' <- unTypes, ut'' <- unTypes ])
+$(concat <$> sequence [ deriveShowSum3 ut ut' ut'' | ut <- unTypes, ut' <- unTypes, ut'' <- unTypes ])
 
 instance P.Show a => Show a where
   show = P.show

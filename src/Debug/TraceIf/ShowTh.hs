@@ -4,6 +4,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UnboxedSums #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedNewtypes #-}
 
@@ -41,3 +42,30 @@ deriveShowTuple4 a b c d = [d|
   instance Show (# $(conT a), $(conT b), $(conT c), $(conT d) #) where
     show (# a#, b#, c#, d# #) = "(# " <> show a# <> ", " <> show b# <> ", " <> show c# <> ", " <> show d# <> " #)"
   |]
+
+deriveShowSum2 :: Name -> Name -> Q [Dec]
+deriveShowSum2 a b = [d|
+  instance Show (# $(conT a) | $(conT b) #) where
+    show (# a# | #) = "(# " <> show a# <> " | #)"
+    show (# | b# #) = "(# | " <> show b# <> " #)"
+  |]
+
+deriveShowSum3 :: Name -> Name -> Name -> Q [Dec]
+deriveShowSum3 a b c = [d|
+  instance Show (# $(conT a) | $(conT b) | $(conT c) #) where
+    show (# x# | | #) = "(# " <> show x# <> " | | #)"
+    show (# | x# | #) = "(# | " <> show x# <> " | #)"
+    show (# | | x# #) = "(# | | " <> show x# <> " #)"
+  |]
+
+deriveShowSum4 :: Name -> Name -> Name -> Name -> Q [Dec]
+deriveShowSum4 a b c d = [d|
+  instance Show (# $(conT a) | $(conT b) | $(conT c) | $(conT d) #) where
+    show (# x# | | | #) = "(# " <> show x# <> " | | | #)"
+    show (# | x# | | #) = "(# | " <> show x# <> " | | #)"
+    show (# | | x# | #) = "(# | | " <> show x# <> " | #)"
+    show (# | | | x# #) = "(# | | | " <> show x# <> " #)"
+  |]
+
+unTypes :: [Name]
+unTypes = [''Int#, ''Char#, ''Double#, ''Float#, ''Addr#]

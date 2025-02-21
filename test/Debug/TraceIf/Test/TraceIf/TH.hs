@@ -170,3 +170,16 @@ prop_ret_unboxed_tuple = isTrue# (1# ==# foo t)
     t = (# 1#, 2# #)
     foo :: (# Int#, Int# #) -> Int#
     foo tt@(# x#, _ #)  = $(tw "foo/tt") x#
+
+prop_ret_unboxed_sum :: Bool
+prop_ret_unboxed_sum = isTrue# $ 1# ==# foo (# 1# | #)
+  where
+    foo :: (# Int# | Double# #) -> Int#
+    foo tt@(# x# | #)  = $(tw "foo/tt") x#
+    foo tt@(# | _ #)  = $(tw "foo/tt") 0#
+
+unit_ret_unboxed_unit :: IO ()
+unit_ret_unboxed_unit = "foo; t: (# #)" @=? foo (#  #)
+  where
+    foo :: (# #) -> String
+    foo t = $(svars "foo/t")
