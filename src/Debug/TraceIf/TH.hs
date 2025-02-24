@@ -68,13 +68,13 @@ The argument has literal and interpolated parts.
 There parts are separated with right slash (/).
 
 @
-foo x y = trace $(svars "foo get/x y") x
+foo x y = trace $(svars "get/x y") x
 @
 
 The snippet above is expanded into:
 
 @
-foo x y = trace ("foo get; x: " <> show x <> "; y: " <> show y) x
+foo x y = trace ("get; x: " <> show x <> "; y: " <> show y) x
 @
 
 'Show' instance of some types (eg lazy ByteString) hide
@@ -83,13 +83,13 @@ Variables after ";" are wrapped into t'ShowTrace':
 
 @
 import Data.ByteString.Lazy
-foo x = trace $(svars "foo get/x;x") x
+foo x = trace $(svars "get/x;x") x
 @
 
 The snippet above is expanded into:
 
 @
-foo x = trace ("foo get; x: " <> show x <> "; x: " <> show (ShowTrace y)) x
+foo x = trace ("get; x: " <> show x <> "; x: " <> show (ShowTrace y)) x
 @
 
 -}
@@ -143,11 +143,12 @@ traceMessage = do
 
 -- | TH version of 'trace'
 -- The argument is processed with 'svars'.
+-- The message is prefixed with 'traceMessage'.
 -- Generated expression has type @forall r (a :: TYPE r) b a. Rewrap a b => a -> a@.
 -- 'id' is generated if \"NOTRACE\" environment variable is not defined.
 -- Example:
 --
--- > foo x = $(tr "foo get/x") x
+-- > foo x = $(tr "get/x") x
 --
 tr :: String -> Q Exp
 tr s
@@ -161,6 +162,7 @@ tr s
 
 -- | TH version of 'traceWith'
 -- The argument is processed with 'svarsWith'.
+-- The message is prefixed with 'traceMessage'.
 -- Generated expression has type @forall r (a :: TYPE r) b a. (Show a, Rewrap a b) => a -> a@.
 -- 'id' is generated if \"NOTRACE\" environment variable is defined.
 tw :: String -> Q Exp
