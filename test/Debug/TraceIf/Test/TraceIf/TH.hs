@@ -11,7 +11,9 @@
 module Debug.TraceIf.Test.TraceIf.TH where
 
 import Data.ByteString.Lazy
+import Data.IntMap.Strict qualified as IM
 import Debug.TraceIf
+import Debug.TraceIf.Test.TraceIf.DemoIndex
 import GHC.Exts
 import Test.Tasty.HUnit ((@=?))
 
@@ -26,7 +28,7 @@ two = 2
 
 unit_traceMessage :: IO ()
 unit_traceMessage =
-  (" 29:Debug.TraceIf.Test.TraceIf.TH " :: String) @=? $(traceMessage)
+  ("Debug.TraceIf.Test.TraceIf.TH:unit_traceMessage: 31 " :: String) @=? $(traceMessage)
 
 unit_svarsWith :: IO ()
 unit_svarsWith =
@@ -183,3 +185,8 @@ unit_ret_unboxed_unit = "foo; t: (# #)" @=? foo (#  #)
   where
     foo :: (# #) -> String
     foo t = $(svars "foo/t")
+
+unit_file_index :: IO ()
+unit_file_index = IM.fromList l @=? demoIndex
+  where
+    l = [(7,"foo"),(12,"***"),(17,"show"),(23,"mylen"),(26,"+++"),(27,"mylen")]

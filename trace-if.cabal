@@ -28,13 +28,13 @@ description:
   {-# LANGUAGE TemplateHaskell #-}
   module Foo where
   import Debug.TraceIf
-  foo x y z = $(tw "foo get/x y z") (x + y + z)
+  foo x y z = $(tw "get/x y z") (x + y + z)
   @
 
   Trace line for @foo 1 2 3@ would be:
 
   @
-    3:Foo foo get; x: 1; y: 2; z: 3 => 6
+    Foo:foo   3 get; x: 1; y: 2; z: 3 => 6
   @
 
   \"NOTRACE\" environment variable disables traces at runtime and
@@ -52,13 +52,13 @@ description:
   import Debug.TraceIf
 
   foo :: Maybe ([Int], Int) -> Int
-  foo v@(Just ([x], {-ignore-} _)) = $(tr "foo get/v@(Just ([x], {-ignore-} _))") x
+  foo v@(Just ([x], {-ignore-} _)) = $(tr "get/v@(Just ([x], {-ignore-} _))") x
   foo _ = 0
   @
 
   A trace line for @foo ([1], 2)@ would be:
 
-  >   7:Foo foo get; v: Just 1; x: 1
+  > Foo:foo:  7 get; v: Just 1; x: 1
 
   === Unlifted vars
 
@@ -71,12 +71,12 @@ description:
   import GHC.Exts
 
   foo :: Int -> ()
-  foo (I# x#) = $(tr "foo get/x#") ()
+  foo (I# x#) = $(tr "get/x#") ()
   @
 
   A trace line for @foo 1@ would be:
 
-  >   7:Foo foo get; x#: 1#
+  > Foo:foo   7 get; x#: 1#
 
 tested-with:
   GHC == 9.10.1
@@ -85,9 +85,12 @@ library
   build-depends:
     base < 5,
     bytestring > 0.11 && < 0.12.3,
+    containers < 0.9,
+    ghc < 9.12,
     template-haskell < 2.24.0.0,
   exposed-modules:
     Debug.TraceIf
+    Debug.TraceIf.FileIndex
     Debug.TraceIf.If
     Debug.TraceIf.Show
     Debug.TraceIf.ShowTh
@@ -107,8 +110,10 @@ test-suite test
   type: exitcode-stdio-1.0
   main-is: Driver.hs
   other-modules:
-    Discovery
+    Debug.TraceIf.Test.TraceIf.DemoIndex
     Debug.TraceIf.Test.TraceIf.TH
+    Demo
+    Discovery
     Paths_trace_if
   autogen-modules:
     Paths_trace_if
@@ -121,6 +126,7 @@ test-suite test
   build-depends:
       base
     , bytestring
+    , containers
     , tasty
     , tasty-discover
     , tasty-hunit

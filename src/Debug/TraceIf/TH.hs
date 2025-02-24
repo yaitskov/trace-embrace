@@ -1,16 +1,19 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, ImportQualifiedPost #-}
 
 -- | Tracing with TH
 module Debug.TraceIf.TH (svars, tr, tw, svarsWith, traceMessage) where
 
 import Data.Char as C
-import Debug.Trace qualified as T
+import Data.IntMap.Strict qualified as IM
+import qualified Debug.Trace as T
 import Debug.TraceIf.If
 import Debug.TraceIf.Show
+import Debug.TraceIf.FileIndex
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import Prelude hiding (Show (..))
 import Text.Printf
+
 
 showTrace :: Show (ShowTrace a) => a -> String
 showTrace = show . ShowTrace
@@ -125,10 +128,18 @@ svarsWith s = [| \x -> ((($(svars s) <> " => ") <>) (show x)) {-:: (Rewrap a b, 
 
 -- | Splice location.
 traceMessage :: Q Exp
-traceMessage = lift =<< locToStr <$> location
-  where
-    locToStr :: Loc -> String
-    locToStr l = printf "%3d:%s " (fst $ loc_start l) (loc_module l)
+traceMessage = do
+  loc <- location
+  let
+    m = loc_module loc
+    line = fst $ loc_start loc
+  funName :: String <- fmap snd . IM.lookupLT line <$> getLineFileIndex loc >>= \case
+    Nothing -> do
+      qReport False $ printf "No function name for line [%d] in module [%s]" line m
+      pure "N/A"
+    Just (FunName fn) -> pure fn
+
+  lift ((printf "%s:%s:%3d " m funName line) :: String)
 
 -- | TH version of 'trace'
 -- The argument is processed with 'svars'.

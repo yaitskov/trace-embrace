@@ -1,5 +1,6 @@
 # Haskell package: trace-if
 
+Writing tracing code is very boring.
 The package minimizes the hassle of writing and maintaining traces in codebase.
 
 There are several issues with functions from standand GHC module
@@ -10,6 +11,18 @@ There are several issues with functions from standand GHC module
   * no way to quickly disable tracing without recompilation
   * no way to keep tracing in source code withou affecting production
     code performance
+
+## Location
+
+TH macro with help of GHC lib besides module and line emitting a trace
+message finds function or method name where trace is used and
+automatically prepends the message.
+
+The minimal trace message contains only a space separadet list of
+variable name to be emitted. The rest comes from the context.  The
+library understands Haskell syntax and variables can be copy/pasted in
+bulk with pattern matching and comments.
+
 
 ## Trace control
 
@@ -27,12 +40,12 @@ module Foo where
 import Debug.TraceIf
 
 foo :: Int -> Int -> Int -> Int
-foo x y z = $(tw "foo get/x y z") (x + y + z)
+foo x y z = $(tw "get/x y z") (x + y + z)
 ```
 
 A trace line for the snippet above would be:
 
->   7:Foo foo get; x: 1; y: 2; z: 3 => 6
+> Foo:foo:  7 get; x: 1; y: 2; z: 3 => 6
 
 ### trace lazy ByteString structure
 
@@ -53,12 +66,12 @@ import Data.ByteString.Lazy
 --   show ...
 
 foo :: ByteString -> ByteString
-foo bs = $(tr "foo get/bs;bs") bs
+foo bs = $(tr "get/bs;bs") bs
 ```
 
 A trace line for the snippet above would be:
 
->  11:Foo foo get; bs: "abc"; bs: ["ab", "c"]
+> Foo:foo: 11 get; bs: "abc"; bs: ["ab", "c"]
 
 
 ### Pattern matching syntax
@@ -73,13 +86,13 @@ module Foo where
 import Debug.TraceIf
 
 foo :: Maybe ([Int], Int) -> Int
-foo v@(Just ([x], {-ignore-} _)) = $(tr "foo get/v@(Just ([x], {-ignore-} _))") x
+foo v@(Just ([x], {-ignore-} _)) = $(tr "get/v@(Just ([x], {-ignore-} _))") x
 foo _ = 0
 ```
 
 A trace line for the snippet above would be:
 
->   7:Foo foo get; v: Just 1; x: 1
+> Foo:foo:  7 get; v: Just 1; x: 1
 
 ### Unlifted vars
 
@@ -92,9 +105,9 @@ import Debug.TraceIf
 import GHC.Exts
 
 foo :: Int -> Int
-foo (I# x#) = (I# ($(tr "foo get/x#") x#))
+foo (I# x#) = (I# ($(tr "get/x#") x#))
 ```
 
 A trace line for the snippet above would be:
 
->   7:Foo foo get; x#: 1#
+> Foo:foo:  7 get; x#: 1#
