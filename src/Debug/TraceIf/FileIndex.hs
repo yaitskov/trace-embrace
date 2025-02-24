@@ -20,8 +20,9 @@ import GHC.Tc.Types
 import GHC.Types.Name hiding (Name)
 import GHC.Types.Name.Reader
 import GHC.Types.SrcLoc
+import GHC.Utils.Outputable hiding ((<>))
 import Language.Haskell.Syntax
-import Language.Haskell.TH.Syntax (Q (..), runIO, getQ, putQ, Loc (..), Lift)
+import Language.Haskell.TH.Syntax (Q (..), runIO, getQ, putQ, Loc (..), Lift, reportWarning)
 import Unsafe.Coerce
 
 
@@ -47,10 +48,15 @@ mkLineFunIndex :: FilePath -> Q LineFileIndex
 mkLineFunIndex fp = do
   fileContent <- runIO (readFile fp)
   ops <- initParserOpts <$> getDynFlags
-  case runParser ops fileContent parseModule of
+  case runParser fp ops fileContent parseModule of
     POk _ (L _ r) ->
       pure $ IM.fromList (concatMap extract (hsmodDecls r))
-    _ -> fail $ "Parser failed for file: " <> show fp
+    PFailed ps -> do
+      reportWarning $
+        "Failed to parse [" <> fp <> "] for line function index due: " <>
+        renderWithContext defaultSDocContext (ppr $ getPsErrorMessages ps) <>
+        "\n--------------------------------------------------------------------"
+      pure mempty
   where
     indexEntry EpAnn {entry} = \case
       L _ fi ->
@@ -74,10 +80,9 @@ mkLineFunIndex fp = do
       concatMap methodExtract (bagToList tcdMeths)
     extract _ = []
 
-runParser :: ParserOpts -> String -> P a -> ParseResult a
-runParser opts str parser = unP parser parseState
+runParser :: FilePath -> ParserOpts -> String -> P a -> ParseResult a
+runParser filename opts str parser = unP parser parseState
   where
-    filename = "<interactive>"
     location' = mkRealSrcLoc (mkFastString filename) 1 1
     buffer = stringToStringBuffer str
     parseState = initParserState opts buffer location'
