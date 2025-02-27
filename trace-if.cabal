@@ -83,13 +83,22 @@ tested-with:
 
 library
   build-depends:
+    aeson < 3.0,
     base < 5,
     bytestring > 0.11 && < 0.12.3,
     containers < 0.9,
+    directory < 2.0,
+    lens < 6.0,
+    generic-lens < 3.0,
     ghc < 9.12,
+    radix-tree < 2.0,
     template-haskell < 2.24.0.0,
+    text < 3.0,
+    transformers < 1.0,
+    yaml < 0.12,
   exposed-modules:
     Debug.TraceIf
+    Debug.TraceIf.Config
     Debug.TraceIf.FileIndex
     Debug.TraceIf.If
     Debug.TraceIf.Show
@@ -100,18 +109,45 @@ library
   hs-source-dirs: src
   default-language: Haskell2010
   default-extensions:
+    -- OverloadedRecordDot
+    -- DisambiguateRecordFields
+    -- OverloadedLabels
     FlexibleContexts
     FlexibleInstances
     ImportQualifiedPost
     LambdaCase
     ScopedTypeVariables
+    -- ConstraintKinds
+    -- DataKinds
+    -- DefaultSignatures
+    -- DeriveDataTypeable
+    -- FlexibleContexts
+    -- FlexibleInstances
+    -- LambdaCase
+    -- MultiParamTypeClasses
+    -- NoImplicitPrelude
+    -- NoMonomorphismRestriction
+    -- OverloadedStrings
+    -- ImportQualifiedPost
+    -- ScopedTypeVariables
+    -- TemplateHaskell
+    -- TupleSections
+    -- TypeApplications
+    -- TypeOperators
+    -- TypeSynonymInstances
 
 test-suite test
   type: exitcode-stdio-1.0
   main-is: Driver.hs
   other-modules:
+    Debug.TraceIf.Test.TraceIf.Config
     Debug.TraceIf.Test.TraceIf.DemoIndex
+    Debug.TraceIf.Test.TraceIf.FileIndex
     Debug.TraceIf.Test.TraceIf.TH
+    Debug.TraceIf.Test.TraceIf.TH.Format.Lifted
+    Debug.TraceIf.Test.TraceIf.TH.Format.Unboxed
+    Debug.TraceIf.Test.TraceIf.TH.Line
+    Debug.TraceIf.Test.TraceIf.TH.Threshold
     Demo
     Discovery
     Paths_trace_if
@@ -120,13 +156,20 @@ test-suite test
   hs-source-dirs:
     test
   default-extensions:
+    BangPatterns
+    FlexibleContexts
     ImportQualifiedPost
+    NamedFieldPuns
+    RecordWildCards
     ScopedTypeVariables
-  ghc-options: -Wall -dynamic -rtsopts -threaded -main-is Driver
+    TemplateHaskell
+  ghc-options: -Wall -rtsopts -threaded -main-is Driver
   build-depends:
       base
     , bytestring
     , containers
+    , generic-lens
+    , lens
     , tasty
     , tasty-discover
     , tasty-hunit

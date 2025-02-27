@@ -1,4 +1,3 @@
-{-# LANGUAGE TemplateHaskell #-}
 module Debug.TraceIf.Test.TraceIf.DemoIndex where
 
 import Data.IntMap.Strict qualified as IM

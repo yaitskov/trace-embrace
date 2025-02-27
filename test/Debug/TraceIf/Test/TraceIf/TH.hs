@@ -1,192 +1,42 @@
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE NamedFieldPuns #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE UnboxedTuples #-}
-{-# LANGUAGE FlexibleContexts #-}
-
+-- {-# LANGUAGE OverloadedStrings #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Debug.TraceIf.Test.TraceIf.TH where
 
 import Data.ByteString.Lazy
-import Data.IntMap.Strict qualified as IM
 import Debug.TraceIf
-import Debug.TraceIf.Test.TraceIf.DemoIndex
-import GHC.Exts
+import Debug.TraceIf.Test.TraceIf.Config
 import Test.Tasty.HUnit ((@=?))
 
--- not working: https://gitlab.haskell.org/ghc/ghc/-/issues/25775
-default (Int)
-
-one :: Int
-one = 1
-
-two :: Int
-two = 2
-
-unit_traceMessage :: IO ()
-unit_traceMessage =
-  ("Debug.TraceIf.Test.TraceIf.TH:unit_traceMessage: 31 " :: String) @=? $(traceMessage)
-
-unit_svarsWith :: IO ()
-unit_svarsWith =
-  let x = one in
-    "bye; x: 1 => 2" @=? $(svarsWith "bye/x") two
-
-unit_let_x :: IO ()
-unit_let_x = "bye; one: 1" @=? $(svars "bye/one")
-
-unit_where_x :: IO ()
-unit_where_x = "bye; x: 1" @=? $(svars "bye/x")
-  where
-    x = one
-
-unit_string :: IO ()
-unit_string = "bye; x: \"abc\"" @=? $(svars "bye/x")
-  where
-    x = "abc" :: String
-
-unit_show_trace :: IO ()
-unit_show_trace = "; x: [\"ab\",\"c\"]" @=? $(svars "/;x")
-  where
-    x = ("ab" <> "c") :: ByteString
-
-unit_show_and_show_trace :: IO ()
-unit_show_and_show_trace = "; y: True; x: [\"ab\",\"c\"]" @=? $(svars "/y;x")
-  where
-    x = ("ab" <> "c") :: ByteString
-    y = True
-
-unit_show_2_vars :: IO ()
-unit_show_2_vars = "; y: True; x: \"abc\"" @=? $(svars "/y x")
-  where
-    x = ("ab" <> "c") :: ByteString
-    y = True
-
-unit_tr :: IO ()
-unit_tr = go one
+unit_tr_trace :: IO ()
+unit_tr_trace = go one
   where
     go x = x @=? foo x
       where
-        foo = $(tr "foo get/x")
+        foo = $(tr "-foo trace/x")
+
+unit_tr_info :: IO ()
+unit_tr_info = go one
+  where
+    go x = x @=? foo x
+      where
+        foo = $(tr "foo info/x")
+
+unit_tr_warning :: IO ()
+unit_tr_warning = go one
+  where
+    go x = x @=? foo x
+      where
+        foo = $(tr "!foo warning/x")
+
+unit_tr_error :: IO ()
+unit_tr_error = go one
+  where
+    go x = x @=? foo x
+      where
+        foo = $(tr "|foo error/x")
 
 unit_tw :: IO ()
 unit_tw = go one
   where
     go x = x @=? foo x
-    foo x = $(tw "foo get/x") x
-
-unit_ignore_parenthesis_and_undebar :: IO ()
-unit_ignore_parenthesis_and_undebar = "foo; x: 1" @=? foo (one, two)
-  where
-    foo (x, _) = $(svars "foo/(x, _)")
-
-unit_empty_var_list :: IO ()
-unit_empty_var_list = "hello" @=? $(svars "hello/")
-
-unit_ignore_single_line_comment :: IO ()
-unit_ignore_single_line_comment = "foo; x: 1" @=? foo one
-  where
-    foo x -- hello
-      = $(svars "foo/x -- hello")
-
-unit_ignore_string :: IO ()
-unit_ignore_string = "foo; x: 1" @=? foo ("y y" :: String) one ("z" :: String)
-  where
-    foo "y y" x "z" = $(svars "foo/\"y y\" x \"z\" =")
-    foo a _ c = "dead code due: " <> show (a, c)
-
-unit_ignore_comment :: IO ()
-unit_ignore_comment = "foo; x: 1" @=? foo one
-  where
-    foo {- comment before -} x {-after-} =
-      $(svars "foo/{- comment before -} x {-after-}")
-
-unit_ignore_bang :: IO ()
-unit_ignore_bang = "foo; x: 1" @=? foo one
-  where
-    foo !x = $(svars "foo/!x")
-
-unit_at :: IO ()
-unit_at = "foo; x: Just 1; y: 1" @=? foo (Just one)
-  where
-    foo x@(Just y) = $(svars "foo/x@(Just y)")
-    foo r = fail $ show r
-
-data Point = Point { xPoint :: Int, yPoint :: Int } deriving Show
-
-unit_record :: IO ()
-unit_record = "foo; xPoint: 12" @=? foo (Point one two)
-  where
-    foo Point {xPoint,..} = $(svars "foo/Point {xPoint,..}") <> show yPoint
-
-unit_record2 :: IO ()
-unit_record2 = "foo; xPoint: 12" @=? foo (Point one two)
-  where
-    foo Point { xPoint, ..} = $(svars "foo/Point { xPoint, ..}") <> show yPoint
-
-unit_list_int :: IO ()
-unit_list_int = "foo; a: 1" @=? foo [one, two, 123]
-  where
-    foo [a, _b, 123] = $(svars "foo/[a, _b, 123]")
-    foo r = fail $ show r
-
-unit_char :: IO ()
-unit_char = "foo; l: \"b\"" @=? foo "ab"
-  where
-    foo ('a':l) = $(svars "foo/('a':l)")
-    foo r = fail $ show r
-
-unit_unboxed_int :: IO ()
-unit_unboxed_int = "foo; x#: 1#" @=? foo one
-  where
-    foo (I# x#) = $(svars "foo/(I# x#)")
-
-unit_ret_unboxed_int :: IO ()
-unit_ret_unboxed_int = "foo; x#: 1# => 1#" @=? foo one
-  where
-    foo (I# x#) = $(svarsWith "foo/(I# x#)") x#
-
-unit_traceWith_unboxed_int :: IO ()
-unit_traceWith_unboxed_int = one @=? foo one
-  where
-    foo (I# x#) = (I# ($(tw "foo/(I# x#)") x#))
-
-unit_trace_ret_unboxed_int :: IO ()
-unit_trace_ret_unboxed_int = one @=? foo one
-  where
-    foo (I# x#) = (I# ($(tr "foo/(I# x#)") x#))
-
-unit_unboxed_tuple :: IO ()
-unit_unboxed_tuple = expec @=? foo (# 1#, 2# #)
-  where
-    expec :: String = "foo; t: (# 1#, 2# #) => 1#"
-    foo :: (# Int#, Int# #) -> String
-    foo t@(# x#, _ #) = $(svarsWith "foo/t") x#
-
-prop_ret_unboxed_tuple :: Bool
-prop_ret_unboxed_tuple = isTrue# (1# ==# foo t)
-  where
-    t = (# 1#, 2# #)
-    foo :: (# Int#, Int# #) -> Int#
-    foo tt@(# x#, _ #)  = $(tw "foo/tt") x#
-
-prop_ret_unboxed_sum :: Bool
-prop_ret_unboxed_sum = isTrue# $ 1# ==# foo (# 1# | #)
-  where
-    foo :: (# Int# | Double# #) -> Int#
-    foo tt@(# x# | #)  = $(tw "foo/tt") x#
-    foo tt@(# | _ #)  = $(tw "foo/tt") 0#
-
-unit_ret_unboxed_unit :: IO ()
-unit_ret_unboxed_unit = "foo; t: (# #)" @=? foo (#  #)
-  where
-    foo :: (# #) -> String
-    foo t = $(svars "foo/t")
-
-unit_file_index :: IO ()
-unit_file_index = IM.fromList l @=? demoIndex
-  where
-    l = [(7,"foo"),(12,"***"),(17,"show"),(23,"mylen"),(26,"+++"),(27,"mylen")]
+    foo x = $(tw "tw foo/x") x
