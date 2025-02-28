@@ -253,7 +253,10 @@ traceG idF genTraceLine s = do
   c <- getConfig
   case c ^. #mode of
     TraceDisabled -> idF
-    TraceStd ->
+    TraceStd -> go c
+    TraceEvent -> go c
+  where
+    go c =
       case traceMessageLevel s of
         (TracingDisabled, _) -> idF
         (tl, s') -> do
@@ -276,9 +279,13 @@ traceG idF genTraceLine s = do
 tr :: Q Exp -> String -> Q Exp
 tr idF = traceG idF go
   where
-    go s fmt = [| \x -> unwrap (T.trace $(traceMessage s fmt svars)
-                                 (wrap x))
-                |]
+    go s fmt = do
+      c <- getConfig
+      let trFun = case c ^. #mode of
+                    TraceDisabled -> error $ "Dead code on" <> show s
+                    TraceStd -> 'T.trace
+                    TraceEvent -> 'T.traceEvent
+      [| \x -> unwrap ($(varE trFun) $(traceMessage s fmt svars) (wrap x)) |]
 
 tw :: Q Exp -> String -> Q Exp
 tw idF = traceG idF go

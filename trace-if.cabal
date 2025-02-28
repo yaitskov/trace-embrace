@@ -136,6 +136,7 @@ test-suite test
     Debug.TraceIf.Test.TraceIf.DemoIndex
     Debug.TraceIf.Test.TraceIf.FileIndex
     Debug.TraceIf.Test.TraceIf.TH
+    Debug.TraceIf.Test.TraceIf.TH.Event
     Debug.TraceIf.Test.TraceIf.TH.Format.Lifted
     Debug.TraceIf.Test.TraceIf.TH.Format.Unboxed
     Debug.TraceIf.Test.TraceIf.TH.Line

@@ -15,7 +15,7 @@ import Language.Haskell.TH.Syntax
 data SinkMode
   = TraceDisabled
   | TraceStd
-  -- | TraceEvent
+  | TraceEvent
   -- | TraceBoth
   deriving (Eq, Show, Ord, Generic)
 
