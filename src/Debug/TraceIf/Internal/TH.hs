@@ -259,20 +259,20 @@ traceG c idF genTraceLine s =
       case traceMessageLevel s of
         (TracingDisabled, _) -> idF
         (tl, s') -> do
-          modName <- T.pack . loc_module <$> location
+          loc <- location
+          let modName = T.pack $ loc_module loc
           case T.lookupL T.Open (T.feedText modName) $ c ^. #levels of
             Nothing -> idF
             Just threshold
               | isLevelOverThreshold threshold tl ->
-                  case c ^. #runtimeLevelsOverrideEnvVar of
-                    Ignored ->
-                      genTraceLine s' $ c ^. #traceMessage
-                    EnvironmentVariable evar -> do
-                      vn <- getModTraceFlagVar
-                      [| case unsafePerformIO (readTraceFlag modName tl evar $(varE vn)) of
-                            True -> $(genTraceLine s' $ c ^. #traceMessage)
-                            False -> $(idF)
-                       |]
+                case envVarName loc (c ^. #runtimeLevelsOverrideEnvVar) of
+                  Just evar -> do
+                    vn <- getModTraceFlagVar
+                    [| case unsafePerformIO (readTraceFlag modName tl evar $(varE vn)) of
+                         True -> $(genTraceLine s' $ c ^. #traceMessage)
+                         False -> $(idF)
+                     |]
+                  Nothing -> genTraceLine s' $ c ^. #traceMessage
               | otherwise -> idF
 
 tr :: Q Exp -> String -> Q Exp

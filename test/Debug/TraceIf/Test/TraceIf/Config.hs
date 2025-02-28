@@ -66,7 +66,11 @@ withPrefixEnvVar :: TraceIfConfig -> String -> IO a -> IO a
 withPrefixEnvVar c val a =
   case c ^. #runtimeLevelsOverrideEnvVar of
     Ignored -> fail "Env var is ignored"
-    EnvironmentVariable ev -> do
+    CapsPackageName ->
+      go $ packageBasedEnvVarPrefix <> "TRACE_IF_0_0_2_INPLACE_TEST"
+    EnvironmentVariable ev -> go ev
+  where
+    go ev =
       withEnv ev val $ do
         modifyMVar_ runtimeTraceIfConfigRef (const $ pure Nothing)
         a

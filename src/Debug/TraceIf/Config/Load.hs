@@ -4,6 +4,7 @@ module Debug.TraceIf.Config.Load where
 
 import Control.Concurrent.MVar
 import Control.Exception
+import Data.Char
 import Data.Generics.Labels ()
 import Data.IORef
 import Data.List qualified as L
@@ -61,8 +62,7 @@ newYamlConfig =
   , version = Just 1
   , traceMessage = Just defaultTraceMessageFormatYaml
   , levels = Just [ LeveledModulePrefix Trace "" ]
-  , runtimeLevelsOverrideEnvVar =
-      Just (EnvironmentVariable "TRACE_IF_LEVEL_AMEND")
+  , runtimeLevelsOverrideEnvVar = Just CapsPackageName
   }
 
 loadYamlConfig :: IO YamlConfig
@@ -171,3 +171,16 @@ markerConfig = TraceIfConfig
     , levels = mkPrefixTree traceAll
     , runtimeLevelsOverrideEnvVar = Ignored
     }
+
+envVarName :: Loc -> EnvironmentVariable -> Maybe String
+envVarName loc = \case
+  Ignored -> Nothing
+  CapsPackageName ->
+    Just . (packageBasedEnvVarPrefix <>)
+    $ toUpper . underscoreNonAlphaNum
+    <$> loc_package loc
+  EnvironmentVariable evar -> Just evar
+  where
+    underscoreNonAlphaNum c
+      | isAlphaNum c = c
+      | otherwise = '_'

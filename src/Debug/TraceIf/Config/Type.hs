@@ -23,9 +23,15 @@ instance ToJSON SinkMode where
   toEncoding = genericToEncoding defaultOptions
 instance FromJSON SinkMode
 
+packageBasedEnvVarPrefix :: String
+packageBasedEnvVarPrefix = "TRACE_EMBRACE_"
+
 -- | Name of environment variable name.
 data EnvironmentVariable
   = Ignored
+  -- | Use upcased package name non alphanum chars are replaced with @_@,
+  -- plus @TRACE_EMBRACE_@ prefix
+  | CapsPackageName -- ^
   | EnvironmentVariable
     { varName :: String }
   deriving (Eq, Show, Ord, Generic)
