@@ -1,8 +1,15 @@
 module Debug.TraceIf.Test.TraceIf.Config where
 
-import Debug.TraceIf.Config hiding (traceMessage)
-import Debug.TraceIf.TH
+import Control.Concurrent.MVar
+import Control.Exception
+import Control.Lens
+import Data.Generics.Labels ()
+import Data.IORef
+import Data.Maybe
+import Debug.TraceIf.Config
+import Debug.TraceIf.Internal.TH
 import Language.Haskell.TH.Syntax
+import System.Environment
 
 positionOnly :: TraceMessageFormat
 positionOnly =
@@ -38,3 +45,31 @@ one = 1
 
 two :: Int
 two = 2
+
+thresholdConfig :: TraceIfConfig
+thresholdConfig =
+  (fromJust (yaml2Config <$> validateYamlConfig newYamlConfig))
+  & #levels .~ mkPrefixTree (emptyPrefixTraceLevel Info)
+
+setConfig :: TraceIfConfig -> Q ()
+setConfig c =
+  runIO (atomicWriteIORef traceIfConfigRef (Just c))
+
+withEnv :: String -> String -> IO a -> IO a
+withEnv evar val a = do
+  oldVal <- lookupEnv evar
+  bracket (setEnv evar val)
+          (\_ -> setEnv evar $ fromMaybe "" oldVal)
+          (\_ -> a)
+
+withPrefixEnvVar :: TraceIfConfig -> String -> IO a -> IO a
+withPrefixEnvVar c val a =
+  case c ^. #runtimeLevelsOverrideEnvVar of
+    Ignored -> fail "Env var is ignored"
+    EnvironmentVariable ev -> do
+      withEnv ev val $ do
+        modifyMVar_ runtimeTraceIfConfigRef (const $ pure Nothing)
+        a
+
+poisonedId :: Q Exp
+poisonedId = [| \x -> x + 1 |]

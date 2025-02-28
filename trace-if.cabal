@@ -92,6 +92,7 @@ library
     generic-lens < 3.0,
     ghc < 9.12,
     radix-tree < 2.0,
+    tagged,
     template-haskell < 2.24.0.0,
     text < 3.0,
     transformers < 1.0,
@@ -99,8 +100,11 @@ library
   exposed-modules:
     Debug.TraceIf
     Debug.TraceIf.Config
+    Debug.TraceIf.Config.Type
+    Debug.TraceIf.Config.Load
     Debug.TraceIf.FileIndex
     Debug.TraceIf.If
+    Debug.TraceIf.Internal.TH
     Debug.TraceIf.Show
     Debug.TraceIf.ShowTh
     Debug.TraceIf.TH
@@ -109,32 +113,20 @@ library
   hs-source-dirs: src
   default-language: Haskell2010
   default-extensions:
-    -- OverloadedRecordDot
-    -- DisambiguateRecordFields
-    -- OverloadedLabels
+    BangPatterns
+    DeriveGeneric
+    DeriveLift
+    DisambiguateRecordFields
+    DuplicateRecordFields
     FlexibleContexts
     FlexibleInstances
     ImportQualifiedPost
     LambdaCase
+    OverloadedLabels
     ScopedTypeVariables
-    -- ConstraintKinds
-    -- DataKinds
-    -- DefaultSignatures
-    -- DeriveDataTypeable
-    -- FlexibleContexts
-    -- FlexibleInstances
-    -- LambdaCase
-    -- MultiParamTypeClasses
-    -- NoImplicitPrelude
-    -- NoMonomorphismRestriction
-    -- OverloadedStrings
-    -- ImportQualifiedPost
-    -- ScopedTypeVariables
-    -- TemplateHaskell
-    -- TupleSections
-    -- TypeApplications
-    -- TypeOperators
-    -- TypeSynonymInstances
+    StandaloneDeriving
+    TemplateHaskell
+    TypeFamilies
 
 test-suite test
   type: exitcode-stdio-1.0
@@ -157,9 +149,12 @@ test-suite test
     test
   default-extensions:
     BangPatterns
+    DisambiguateRecordFields
+    DuplicateRecordFields
     FlexibleContexts
     ImportQualifiedPost
     NamedFieldPuns
+    OverloadedLabels
     RecordWildCards
     ScopedTypeVariables
     TemplateHaskell
@@ -168,6 +163,7 @@ test-suite test
       base
     , bytestring
     , containers
+    , filepath < 1.6
     , generic-lens
     , lens
     , tasty
@@ -175,7 +171,9 @@ test-suite test
     , tasty-hunit
     , tasty-quickcheck
     , template-haskell
+    , temporary < 1.5
     , trace-if
+    , yaml
   default-language: Haskell2010
 
 source-repository head

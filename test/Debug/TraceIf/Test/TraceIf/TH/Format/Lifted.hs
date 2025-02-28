@@ -2,7 +2,7 @@
 module Debug.TraceIf.Test.TraceIf.TH.Format.Lifted where
 
 import Data.ByteString.Lazy
-import Debug.TraceIf
+import Debug.TraceIf.Internal.TH
 import Debug.TraceIf.Test.TraceIf.Config
 
 import Test.Tasty.HUnit ((@=?))

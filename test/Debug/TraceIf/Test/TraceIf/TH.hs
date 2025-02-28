@@ -1,8 +1,6 @@
--- {-# LANGUAGE OverloadedStrings #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Debug.TraceIf.Test.TraceIf.TH where
 
-import Data.ByteString.Lazy
 import Debug.TraceIf
 import Debug.TraceIf.Test.TraceIf.Config
 import Test.Tasty.HUnit ((@=?))

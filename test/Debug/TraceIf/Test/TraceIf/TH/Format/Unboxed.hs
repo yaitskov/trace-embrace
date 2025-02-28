@@ -1,16 +1,13 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnboxedSums #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 module Debug.TraceIf.Test.TraceIf.TH.Format.Unboxed where
-
-import Test.Tasty.HUnit ((@=?))
 
 import Debug.TraceIf
 import Debug.TraceIf.Test.TraceIf.Config
 import GHC.Exts
+import Test.Tasty.HUnit ((@=?))
 
 unit_unboxed_int :: IO ()
 unit_unboxed_int = "foo; x#: 1#" @=? foo one
