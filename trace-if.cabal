@@ -142,6 +142,7 @@ test-suite test
     Debug.TraceIf.Test.TraceIf.TH.Format.Unboxed
     Debug.TraceIf.Test.TraceIf.TH.Line
     Debug.TraceIf.Test.TraceIf.TH.Threshold
+    Debug.TraceIf.Test.TraceIf.Yaml
     Demo
     Discovery
     Paths_trace_if
@@ -175,6 +176,7 @@ test-suite test
     , tasty-quickcheck
     , template-haskell
     , temporary < 1.5
+    , text
     , trace-if
     , yaml
   default-language: Haskell2010

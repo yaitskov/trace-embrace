@@ -1,11 +1,12 @@
 {-# LANGUAGE OverloadedRecordDot #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoFieldSelectors #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Debug.TraceIf.Config.Type where
 
 import Control.Applicative
 import Control.Lens hiding (levels)
-import Data.Aeson
+import Data.Aeson hiding (Error)
 import Data.Generics.Labels ()
 import Data.RadixTree.Word8.Strict qualified as T
 import Data.Text
@@ -16,7 +17,6 @@ data SinkMode
   = TraceDisabled
   | TraceStd
   | TraceEvent
-  -- | TraceBoth
   deriving (Eq, Show, Ord, Generic)
 
 instance ToJSON SinkMode where
@@ -109,11 +109,25 @@ data TraceLevel
   | Warning
   | Error
   | TracingDisabled
-  deriving (Eq, Show, Ord, Lift, Generic)
+  deriving (Eq, Show, Ord, Lift, Generic, Bounded, Enum)
 
-instance ToJSON TraceLevel where
-  toEncoding = genericToEncoding defaultOptions
-instance FromJSON TraceLevel
+traceLevelToChar :: TraceLevel -> Text
+traceLevelToChar = \case
+  Trace -> "-"
+  Info -> ""
+  Warning -> "!"
+  Error -> "|"
+  TracingDisabled -> "#"
+
+charToLevel :: String -> (TraceLevel, String)
+charToLevel [] = (TracingDisabled, "")
+charToLevel s@(l:m)=
+  case l of
+    '-' -> (Trace, m)
+    '!' -> (Warning, m)
+    '|' -> (Error, m)
+    '#' -> (TracingDisabled, m)
+    _   -> (Info,  s)
 
 data LeveledModulePrefix
   = LeveledModulePrefix
@@ -122,8 +136,13 @@ data LeveledModulePrefix
     } deriving (Eq, Show, Generic)
 
 instance ToJSON LeveledModulePrefix where
-  toEncoding = genericToEncoding defaultOptions
-instance FromJSON LeveledModulePrefix
+  toJSON o = String $ traceLevelToChar o.level <> o.modulePrefix
+instance FromJSON LeveledModulePrefix where
+  parseJSON (String x) =
+    pure . uncurry LeveledModulePrefix . fmap pack . charToLevel $ unpack x
+  parseJSON o =
+    fail $ "Failed to parse [" <> show o
+      <> "] as LeveledModulePrefix because String is expected"
 
 data YamlConfigG a
   = YamlConfig

@@ -140,14 +140,7 @@ splitMessageFromVars (TrMsgAndVars trMsg) =
     e ->  error $ "No case for:" <> show e
 
 traceMessageLevel :: String -> (TraceLevel, TrMsgAndVars)
-traceMessageLevel [] = (TracingDisabled, TrMsgAndVars [])
-traceMessageLevel s@(l:m) = charToLevel l
-  where
-    charToLevel = \case
-      '-' -> (Trace, TrMsgAndVars m)
-      '!' -> (Warning, TrMsgAndVars m)
-      '|' -> (Error, TrMsgAndVars m)
-      _   -> (Info, TrMsgAndVars s)
+traceMessageLevel = fmap TrMsgAndVars . charToLevel
 
 -- | Suffix 'svars' with return value.
 svarsWith :: SVarsFun
