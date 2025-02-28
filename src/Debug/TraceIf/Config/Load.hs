@@ -1,9 +1,11 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Debug.TraceIf.Config.Load where
 
 import Control.Concurrent.MVar
 import Control.Exception
+import Data.Cache.LRU as LRU
 import Data.Char
 import Data.Generics.Labels ()
 import Data.IORef
@@ -12,6 +14,7 @@ import Data.RadixTree.Word8.Strict qualified as T
 import Data.Yaml as Y
 import Debug.Trace (traceIO)
 import Debug.TraceIf.Config.Type
+import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import System.Directory
 import System.IO.Unsafe
@@ -90,9 +93,10 @@ traceIfConfigFileName = "trace-if.yaml"
 traceIfConfigRef :: IORef (Maybe TraceIfConfig)
 traceIfConfigRef = unsafePerformIO (newIORef Nothing)
 
--- TODO: Cache by file name instead of Maybe  to support multiple libraries
-runtimeTraceIfConfigRef :: MVar (Maybe (T.StrictRadixTree TraceLevel))
-runtimeTraceIfConfigRef = unsafePerformIO (newMVar Nothing)
+newtype DynConfigEnvVar = DynConfigEnvVar String deriving (Eq, Show, Ord, Lift)
+
+runtimeTraceIfConfigRef :: MVar (LRU DynConfigEnvVar (T.StrictRadixTree TraceLevel))
+runtimeTraceIfConfigRef = unsafePerformIO (newMVar $ newLRU (Just 7))
 
 mkPrefixTree :: [LeveledModulePrefix] -> T.StrictRadixTree TraceLevel
 mkPrefixTree = L.foldl' go T.empty
@@ -128,8 +132,8 @@ emptyPrefixTraceLevel tl =
     }
   ]
 
-loadRuntimeConfig :: String -> IO (T.StrictRadixTree TraceLevel)
-loadRuntimeConfig evar = do
+loadRuntimeConfig :: DynConfigEnvVar -> IO (T.StrictRadixTree TraceLevel)
+loadRuntimeConfig (DynConfigEnvVar evar) = do
   lookupEnv evar >>= \case
     Nothing -> pure $ mkPrefixTree traceAll
     Just "" -> pure T.empty
@@ -152,17 +156,14 @@ loadRuntimeConfigFromYamlFile fp =
       fail $ "Fail to parse trace-if runtime config from file " <> show fp <> " due:\n"
       <> prettyPrintParseException e
 
-getRuntimeConfig :: String -> IO (T.StrictRadixTree TraceLevel)
-getRuntimeConfig evar = do
-  readMVar runtimeTraceIfConfigRef >>= \case
-    Just prTree -> pure prTree
-    Nothing -> modifyMVar runtimeTraceIfConfigRef go >>= \case
-      Nothing -> fail $ "getRuntimeConfig infinite recursion"
-      Just r -> pure r
+getRuntimeConfig :: DynConfigEnvVar -> IO (T.StrictRadixTree TraceLevel)
+getRuntimeConfig evar = modifyMVar runtimeTraceIfConfigRef go
   where
-    go = \case
-      j@(Just _) -> pure (j, j)
-      Nothing -> loadRuntimeConfig evar >>= \c -> pure (Just c, Just c)
+    go lru =
+      case LRU.lookup evar lru of
+        (lru', Just dynCon) -> pure (lru', dynCon)
+        (_, Nothing) -> loadRuntimeConfig evar >>=
+          \c -> pure (LRU.insert evar c lru, c)
 
 markerConfig :: TraceIfConfig
 markerConfig = TraceIfConfig
@@ -172,8 +173,8 @@ markerConfig = TraceIfConfig
     , runtimeLevelsOverrideEnvVar = Ignored
     }
 
-envVarName :: Loc -> EnvironmentVariable -> Maybe String
-envVarName loc = \case
+envVarName :: Loc -> EnvironmentVariable -> Maybe DynConfigEnvVar
+envVarName loc = fmap DynConfigEnvVar . \case
   Ignored -> Nothing
   CapsPackageName ->
     Just . (packageBasedEnvVarPrefix <>)

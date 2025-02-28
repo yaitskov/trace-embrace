@@ -3,6 +3,7 @@ module Debug.TraceIf.Test.TraceIf.Config where
 import Control.Concurrent.MVar
 import Control.Exception
 import Control.Lens
+import Data.Cache.LRU
 import Data.Generics.Labels ()
 import Data.IORef
 import Data.Maybe
@@ -72,7 +73,7 @@ withPrefixEnvVar c val a =
   where
     go ev =
       withEnv ev val $ do
-        modifyMVar_ runtimeTraceIfConfigRef (const $ pure Nothing)
+        modifyMVar_ runtimeTraceIfConfigRef (\_ -> pure . newLRU $ Just 7)
         a
 
 poisonedId :: Q Exp

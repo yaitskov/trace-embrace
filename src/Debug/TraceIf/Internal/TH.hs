@@ -235,17 +235,17 @@ isLevelOverThreshold (T.Lookup _ levelThreshold) tl = levelThreshold <= tl
 {-# INLINE isLevelOverThreshold #-}
 
 -- | Eval level and cache
-readTraceFlag ::  T.Text -> TraceLevel -> String -> IORef (Maybe Bool) -> IO Bool
+readTraceFlag ::  T.Text -> TraceLevel -> DynConfigEnvVar -> IORef (Maybe Bool) -> IO Bool
 readTraceFlag modName trLvl evar fv = do
   readIORef fv >>= \case
-    Just r -> pure (T.trace ("readTraceFlag ret cached " <> show r) r)
+    Just r -> pure r
     Nothing -> do
       T.lookupL T.Open (T.feedText modName) <$> getRuntimeConfig evar >>= \case
         Just threshold ->
           let !r = isLevelOverThreshold threshold trLvl in
-            atomicWriteIORef fv (Just $ T.trace ("readTraceFlag store r = " <> show r) r) >> pure r
+            atomicWriteIORef fv (Just r) >> pure r
         Nothing ->
-          atomicWriteIORef fv (Just $ T.trace "readTraceFlag store Fal" False) >> pure False
+          atomicWriteIORef fv (Just False) >> pure False
 {-# INLINE readTraceFlag #-}
 
 traceG :: TraceIfConfig -> Q Exp -> (TrMsgAndVars -> TraceMessageFormat -> Q Exp) -> String -> Q Exp
