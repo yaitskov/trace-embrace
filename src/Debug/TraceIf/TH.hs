@@ -1,5 +1,5 @@
 -- | Tracing with TH
-module Debug.TraceIf.TH (tr, tw, trIo) where
+module Debug.TraceIf.TH (tr, tw, trIo, trFunMarker, trIoFunMarker) where
 
 import Debug.TraceIf.Internal.TH qualified as I
 import Language.Haskell.TH
@@ -44,3 +44,13 @@ tw = I.tw [| \x -> x |]
 -- > Main::foo get; x : 132
 trIo :: String -> Q Exp
 trIo = I.trIo [| pure () |]
+
+-- | TH version of 'traceMarker' where module and function
+-- are used as a marker. Trace level is used.
+trFunMarker :: Q Exp
+trFunMarker = I.trFunMarker [| \x -> x |]
+
+-- | TH version of 'traceMarkerIO' where module and function
+-- are used as a marker. Trace level is not used.
+trIoFunMarker :: Q Exp
+trIoFunMarker = I.trIoFunMarker [| pure () |]

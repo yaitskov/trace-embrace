@@ -163,3 +163,11 @@ getRuntimeConfig evar = do
     go = \case
       j@(Just _) -> pure (j, j)
       Nothing -> loadRuntimeConfig evar >>= \c -> pure (Just c, Just c)
+
+markerConfig :: TraceIfConfig
+markerConfig = TraceIfConfig
+    { mode = TraceEvent
+    , traceMessage = TraceMessageFormat "" "" "" [ ModuleName, Delimiter "::", FunctionName ]
+    , levels = mkPrefixTree traceAll
+    , runtimeLevelsOverrideEnvVar = Ignored
+    }

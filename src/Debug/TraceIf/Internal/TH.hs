@@ -248,15 +248,14 @@ readTraceFlag modName trLvl evar fv = do
           atomicWriteIORef fv (Just $ T.trace "readTraceFlag store Fal" False) >> pure False
 {-# INLINE readTraceFlag #-}
 
-traceG :: Q Exp -> (TrMsgAndVars -> TraceMessageFormat -> Q Exp) -> String -> Q Exp
-traceG idF genTraceLine s = do
-  c <- getConfig
+traceG :: TraceIfConfig -> Q Exp -> (TrMsgAndVars -> TraceMessageFormat -> Q Exp) -> String -> Q Exp
+traceG c idF genTraceLine s =
   case c ^. #mode of
     TraceDisabled -> idF
-    TraceStd -> go c
-    TraceEvent -> go c
+    TraceStd -> go
+    TraceEvent -> go
   where
-    go c =
+    go =
       case traceMessageLevel s of
         (TracingDisabled, _) -> idF
         (tl, s') -> do
@@ -277,10 +276,11 @@ traceG idF genTraceLine s = do
               | otherwise -> idF
 
 tr :: Q Exp -> String -> Q Exp
-tr idF = traceG idF go
+tr idF rawMsg = do
+  c <- getConfig
+  traceG c idF (go c) rawMsg
   where
-    go s fmt = do
-      c <- getConfig
+    go c s fmt = do
       let trFun = case c ^. #mode of
                     TraceDisabled -> error $ "Dead code on" <> show s
                     TraceStd -> 'T.trace
@@ -288,10 +288,11 @@ tr idF = traceG idF go
       [| \x -> unwrap ($(varE trFun) $(traceMessage s fmt svars) (wrap x)) |]
 
 tw :: Q Exp -> String -> Q Exp
-tw idF = traceG idF go
+tw idF rawMsg = do
+  c <- getConfig
+  traceG c idF (go c) rawMsg
   where
-    go s fmt = do
-      c <- getConfig
+    go c s fmt = do
       let trFun = case c ^. #mode of
                     TraceDisabled -> error $ "Dead code on" <> show s
                     TraceStd -> 'T.trace
@@ -302,12 +303,31 @@ tw idF = traceG idF go
        |]
 
 trIo :: Q Exp -> String -> Q Exp
-trIo idF = traceG idF go
+trIo idF rawMsg = do
+  c <- getConfig
+  traceG c idF (go c) rawMsg
   where
-    go s fmt = do
-      c <- getConfig
+    go c s fmt = do
       let trFun = case c ^. #mode of
                     TraceDisabled -> error $ "Dead code on" <> show s
                     TraceStd -> 'T.traceIO
                     TraceEvent -> 'T.traceEventIO
       [| $(varE trFun) $(traceMessage s fmt svars) |]
+
+trFunMarker :: Q Exp -> Q Exp
+trFunMarker idF = do
+  c <- getConfig
+  let finalC = if c ^. #mode == TraceDisabled then c else markerConfig
+  traceG finalC idF go "/"
+  where
+    go s fmt =
+      [| \x -> unwrap (T.traceMarker $(traceMessage s fmt svars) (wrap x)) |]
+
+trIoFunMarker :: Q Exp -> Q Exp
+trIoFunMarker idF = do
+  c <- getConfig
+  let finalC = if c ^. #mode == TraceDisabled then c else markerConfig
+  traceG finalC idF go "/"
+  where
+    go s fmt =
+      [| T.traceMarkerIO $(traceMessage s fmt svars) |]
