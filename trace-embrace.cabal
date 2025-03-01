@@ -87,6 +87,7 @@ library
     base < 5,
     bytestring > 0.11 && < 0.12.3,
     containers < 0.9,
+    deepseq < 1.8,
     directory < 2.0,
     lens < 6.0,
     lrucache < 1.3,

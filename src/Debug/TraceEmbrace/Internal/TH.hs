@@ -1,5 +1,6 @@
 module Debug.TraceEmbrace.Internal.TH where
 
+import Control.DeepSeq
 import Control.Lens hiding (levels)
 import Control.Monad.Trans.State.Strict
 import Control.Monad.Trans.Class qualified as MT
@@ -249,6 +250,7 @@ traceG c idF genTraceLine s =
   case c ^. #mode of
     TraceDisabled -> idF
     TraceStd -> go
+    TraceUnsafeIo -> go
     TraceEvent -> go
   where
     go =
@@ -271,6 +273,15 @@ traceG c idF genTraceLine s =
                   Nothing -> genTraceLine s' $ c ^. #traceMessage
               | otherwise -> idF
 
+unsafePutStrLn :: String -> a -> a
+unsafePutStrLn msg v =
+  msg `deepseq` (unsafePerformIO (putStrLn msg)) `seq` v
+{-# NOINLINE unsafePutStrLn #-}
+
+safePutStrLn :: String -> a -> IO a
+safePutStrLn msg v =
+  putStrLn msg >> pure v
+
 tr :: Q Exp -> String -> Q Exp
 tr idF rawMsg = do
   c <- getConfig
@@ -280,6 +291,7 @@ tr idF rawMsg = do
       let trFun = case c ^. #mode of
                     TraceDisabled -> error $ "Dead code on" <> show s
                     TraceStd -> 'T.trace
+                    TraceUnsafeIo -> 'unsafePutStrLn
                     TraceEvent -> 'T.traceEvent
       [| \x -> unwrap ($(varE trFun) $(traceMessage s fmt svars) (wrap x)) |]
 
@@ -292,6 +304,7 @@ tw idF rawMsg = do
       let trFun = case c ^. #mode of
                     TraceDisabled -> error $ "Dead code on" <> show s
                     TraceStd -> 'T.trace
+                    TraceUnsafeIo -> 'unsafePutStrLn
                     TraceEvent -> 'T.traceEvent
       [| \x -> unwrap ($(varE trFun)
                         ($(traceMessage s fmt svarsWith) x)
@@ -307,6 +320,7 @@ trIo idF rawMsg = do
       let trFun = case c ^. #mode of
                     TraceDisabled -> error $ "Dead code on" <> show s
                     TraceStd -> 'T.traceIO
+                    TraceUnsafeIo -> 'safePutStrLn
                     TraceEvent -> 'T.traceEventIO
       [| $(varE trFun) $(traceMessage s fmt svars) |]
 

@@ -6,6 +6,12 @@ import Debug.TraceEmbrace.Internal.TH
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
 import Test.Tasty.HUnit ((@=?))
 
+unit_unsafeio_mode :: IO ()
+unit_unsafeio_mode =
+  withPrefixEnvVar thresholdConfig "" $ do
+    one @=? $(setConfig (thresholdConfig & #mode .~ TraceUnsafeIo)
+              >> tr poisonedId "tm") one
+
 unit_event_mode :: IO ()
 unit_event_mode =
   withPrefixEnvVar thresholdConfig "" $ do

@@ -7,12 +7,12 @@ import Data.Generics.Labels ()
 import Data.Text qualified as T
 import Data.Typeable
 import GHC.Generics
-
 import Refined
 
 data SinkMode
   = TraceDisabled
   | TraceStd
+  | TraceUnsafeIo
   | TraceEvent
   deriving (Eq, Show, Ord, Generic)
 
