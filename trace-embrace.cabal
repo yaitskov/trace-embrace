@@ -95,7 +95,7 @@ library
     ghc < 9.12,
     radix-tree < 2.0,
     refined < 1.0,
-    tagged,
+    tagged < 1.0,
     template-haskell < 2.24.0.0,
     text < 3.0,
     transformers < 1.0,
