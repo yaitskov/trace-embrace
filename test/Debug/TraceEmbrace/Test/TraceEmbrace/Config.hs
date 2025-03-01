@@ -80,7 +80,7 @@ withPrefixEnvVar c val a =
   case c ^. #runtimeLevelsOverrideEnvVar of
     Ignored -> fail "Env var is ignored"
     CapsPackageName ->
-      go $ packageBasedEnvVarPrefix <> "TRACE_EMBRACE_0_0_2_INPLACE_TEST"
+      go $ packageBasedEnvVarPrefix <> "TRACE_EMBRACE"
     EnvironmentVariable ev -> go ev
   where
     go ev =

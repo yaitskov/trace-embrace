@@ -193,11 +193,17 @@ envVarName :: Loc -> EnvironmentVariable -> Maybe DynConfigEnvVar
 envVarName loc = fmap DynConfigEnvVar . \case
   Ignored -> Nothing
   CapsPackageName ->
-    Just . (packageBasedEnvVarPrefix <>)
+    Just . (packageBasedEnvVarPrefix <>) . dropSuffix
     $ toUpper . underscoreNonAlphaNum
     <$> loc_package loc
   EnvironmentVariable evar -> Just evar
   where
+    dropSuffix ('_':h:t)
+       | isDigit h = []
+       | otherwise = '_' : (dropSuffix $ h : t)
+    dropSuffix (o:t) =  o : dropSuffix t
+    dropSuffix [] = []
+
     underscoreNonAlphaNum c
       | isAlphaNum c = c
       | otherwise = '_'
