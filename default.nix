@@ -24,10 +24,10 @@ let
     "^.*\\.cabal$"
   ];
 
-  base = hsPkgs.callCabal2nix "trace-if" (lib.sourceByRegex ./. sources) { };
-  trace-if-overlay = _hf: _hp: { trace-if = base; };
+  base = hsPkgs.callCabal2nix "trace-embrace" (lib.sourceByRegex ./. sources) { };
+  trace-embrace-overlay = _hf: _hp: { trace-embrace = base; };
   baseHaskellPkgs = pkgs.haskell.packages.${ghc};
-  hsOverlays = [ hsPkgSetOverlay trace-if-overlay ];
+  hsOverlays = [ hsPkgSetOverlay trace-embrace-overlay ];
   hsPkgs = baseHaskellPkgs.override (old: {
     overrides =
       builtins.foldl' pkgs.lib.composeExtensions (old.overrides or (_: _: { }))
@@ -38,7 +38,7 @@ let
     (_: { enableSharedExecutables = true; });
 
   shell = hsPkgs.shellFor {
-    packages = p: [ p.trace-if ];
+    packages = p: [ p.trace-embrace ];
     nativeBuildInputs = (with pkgs; [
       cabal-install
       ghcid
@@ -51,11 +51,11 @@ let
     '';
   };
 
-  trace-if = hsPkgs.trace-if;
+  trace-embrace = hsPkgs.trace-embrace;
 in {
   inherit hsPkgs;
   inherit ghc;
   inherit pkgs;
   inherit shell;
-  inherit trace-if;
+  inherit trace-embrace;
 }

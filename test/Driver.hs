@@ -9,4 +9,4 @@ main = defaultMain =<< testTree
     testTree :: IO TestTree
     testTree = do
       tests <- Discovery.tests
-      pure $ testGroup "trace-if" [ tests ]
+      pure $ testGroup "trace-embrace" [ tests ]

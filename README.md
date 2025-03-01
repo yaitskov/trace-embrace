@@ -1,4 +1,4 @@
-# Haskell package: trace-if
+# Haskell package: trace-embrace
 
 Writing tracing code is very boring.
 The package minimizes the hassle of writing and maintaining traces in codebase.
@@ -37,7 +37,7 @@ removes TH-driven tracing code completely at compile time.
 {-# LANGUAGE TemplateHaskell #-}
 module Foo where
 
-import Debug.TraceIf
+import Debug.TraceEmbrace
 
 foo :: Int -> Int -> Int -> Int
 foo x y z = $(tw "get/x y z") (x + y + z)
@@ -59,7 +59,7 @@ instance should be provided.
 {-# LANGUAGE TemplateHaskell #-}
 module Foo where
 
-import Debug.TraceIf
+import Debug.TraceEmbrace
 import Data.ByteString.Lazy
 
 -- instance Show (ShowTrace ByteString) where
@@ -83,7 +83,7 @@ function arguments can be quickly copy-pasted as-is:
 {-# LANGUAGE TemplateHaskell #-}
 module Foo where
 
-import Debug.TraceIf
+import Debug.TraceEmbrace
 
 foo :: Maybe ([Int], Int) -> Int
 foo v@(Just ([x], {-ignore-} _)) = $(tr "get/v@(Just ([x], {-ignore-} _))") x
@@ -101,7 +101,7 @@ A trace line for the snippet above would be:
 {-# LANGUAGE MagicHash #-}
 module Foo where
 
-import Debug.TraceIf
+import Debug.TraceEmbrace
 import GHC.Exts
 
 foo :: Int -> Int
