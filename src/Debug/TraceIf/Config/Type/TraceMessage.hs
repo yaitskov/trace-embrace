@@ -20,7 +20,6 @@ data TraceMessageElement
   | PackageName -- ^ Cabal package name
   | FunctionName -- ^ Function or method name containing tracing
   | LineNumber -- ^ Line number with tracing
-  | TimeStamp { format :: String } -- ^ @%H:%M:%S.%q@
   | Delimiter String -- | TraceMessageElement delimiter
   deriving (Eq, Show, Generic, Lift)
 
