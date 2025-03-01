@@ -37,8 +37,7 @@ description:
     Foo:foo   3 get; x: 1; y: 2; z: 3 => 6
   @
 
-  \"NOTRACE\" environment variable disables traces at runtime and
-  removes tracing code completely at compile time.
+  An environment variable can disable traces at runtime.
 
   === Pattern matching
 
@@ -111,7 +110,7 @@ library
     Debug.TraceEmbrace.Config.Load
     Debug.TraceEmbrace.Config.Validation
     Debug.TraceEmbrace.FileIndex
-    Debug.TraceEmbrace.If
+    Debug.TraceEmbrace.Internal.Rewrap
     Debug.TraceEmbrace.Internal.TH
     Debug.TraceEmbrace.Show
     Debug.TraceEmbrace.ShowTh

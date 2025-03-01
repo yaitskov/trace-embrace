@@ -1,21 +1,11 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
 
--- | "Debug.Trace" functions protected with environment variable.
-module Debug.TraceEmbrace.If where
+module Debug.TraceEmbrace.Internal.Rewrap where
 
 import GHC.Exts
-import System.Environment (lookupEnv)
-import System.IO.Unsafe (unsafeDupablePerformIO)
-
--- | Return 'True' if \"NOTRACE\" environment variable is not defined.
-isTracingEnabled :: Bool
-isTracingEnabled = unsafeDupablePerformIO (lookupEnv "NOTRACE") == Nothing
 
 class Rewrap (t :: TYPE r) b | t -> b where
   wrap :: t -> b

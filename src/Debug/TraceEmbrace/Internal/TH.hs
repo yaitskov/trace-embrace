@@ -11,10 +11,10 @@ import Data.Text qualified as T
 import Data.IntMap.Strict qualified as IM
 import Data.RadixTree.Word8.Strict qualified as T
 import qualified Debug.Trace as T
-import Debug.TraceEmbrace.If
-import Debug.TraceEmbrace.Show
-import Debug.TraceEmbrace.FileIndex
 import Debug.TraceEmbrace.Config
+import Debug.TraceEmbrace.FileIndex
+import Debug.TraceEmbrace.Internal.Rewrap
+import Debug.TraceEmbrace.Show
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import Prelude hiding (Show (..))

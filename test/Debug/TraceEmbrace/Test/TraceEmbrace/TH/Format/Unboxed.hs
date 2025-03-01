@@ -7,7 +7,6 @@ module Debug.TraceEmbrace.Test.TraceEmbrace.TH.Format.Unboxed where
 import Control.Lens
 import Data.Generics.Labels ()
 import Debug.TraceEmbrace
-import Debug.TraceEmbrace.Config.Type
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
 import GHC.Exts
 import Test.Tasty.HUnit ((@=?))
