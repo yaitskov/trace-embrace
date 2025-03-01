@@ -14,16 +14,15 @@ import Data.RadixTree.Word8.Strict qualified as T
 import Data.Yaml as Y
 import Debug.Trace (traceIO)
 import Debug.TraceEmbrace.Config.Type
-import Debug.TraceEmbrace.Config.Type.EnvVar
-import Debug.TraceEmbrace.Config.Type.Level
-import Debug.TraceEmbrace.Config.Type.TraceMessage
 import Debug.TraceEmbrace.Config.Validation
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import Refined
 import System.Directory
 import System.Environment (lookupEnv)
+import System.IO
 import System.IO.Unsafe
+
 
 validateTraceMessageFormat ::
   String ->
@@ -103,11 +102,17 @@ traceIfConfigFileName = "trace-embrace.yaml"
 
 traceIfConfigRef :: IORef (Maybe TraceEmbraceConfig)
 traceIfConfigRef = unsafePerformIO (newIORef Nothing)
+{-# NOINLINE traceIfConfigRef #-}
+
+unsafeIoSink :: IORef (Maybe Handle)
+unsafeIoSink = unsafePerformIO (newIORef Nothing)
+{-# NOINLINE unsafeIoSink #-}
 
 newtype DynConfigEnvVar = DynConfigEnvVar String deriving (Eq, Show, Ord, Lift)
 
 runtimeTraceEmbraceConfigRef :: MVar (LRU DynConfigEnvVar (T.StrictRadixTree TraceLevel))
 runtimeTraceEmbraceConfigRef = unsafePerformIO (newMVar $ newLRU (Just 7))
+{-# NOINLINE runtimeTraceEmbraceConfigRef #-}
 
 mkPrefixTree :: [LeveledModulePrefix] -> T.StrictRadixTree TraceLevel
 mkPrefixTree = L.foldl' go T.empty

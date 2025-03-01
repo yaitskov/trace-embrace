@@ -15,14 +15,12 @@ import Debug.TraceEmbrace.If
 import Debug.TraceEmbrace.Show
 import Debug.TraceEmbrace.FileIndex
 import Debug.TraceEmbrace.Config
-import Debug.TraceEmbrace.Config.Type.EnvVar
-import Debug.TraceEmbrace.Config.Type.Level
-import Debug.TraceEmbrace.Config.Type.TraceMessage
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import Prelude hiding (Show (..))
 import Prelude qualified as P
 import Refined
+import System.IO
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf
 
@@ -250,7 +248,7 @@ traceG c idF genTraceLine s =
   case c ^. #mode of
     TraceDisabled -> idF
     TraceStd -> go
-    TraceUnsafeIo -> go
+    TraceUnsafeIo _ -> go
     TraceEvent -> go
   where
     go =
@@ -273,40 +271,55 @@ traceG c idF genTraceLine s =
                   Nothing -> genTraceLine s' $ c ^. #traceMessage
               | otherwise -> idF
 
-unsafePutStrLn :: String -> a -> a
-unsafePutStrLn msg v =
-  msg `deepseq` (unsafePerformIO (putStrLn msg)) `seq` v
+unsafePutStrLn :: IoSink -> String -> a -> a
+unsafePutStrLn s msg v =
+  msg `deepseq` (unsafePerformIO (hPutStrLn (getSinkHandle s) msg)) `seq` v
+  where
 {-# NOINLINE unsafePutStrLn #-}
 
-safePutStrLn :: String -> a -> IO a
-safePutStrLn msg v =
-  putStrLn msg >> pure v
+getSinkHandle :: IoSink -> Handle
+getSinkHandle s =
+  case s of
+    StdErrSink -> stderr
+    StdOutSink -> stdout
+    FileSink fp -> unsafePerformIO $ do
+      readIORef unsafeIoSink >>= \case
+        Just h -> pure h
+        Nothing -> do
+          nh <- openFile fp AppendMode
+          (atomicModifyIORef' unsafeIoSink $ \case
+            Nothing -> (Just nh, (False, nh))
+            Just oh -> (Just oh, (True, oh))) >>= \case
+               (True, h) ->  hClose nh >> pure h
+               (False, h) -> pure h
+
+safePutStrLn :: IoSink -> String -> a -> IO a
+safePutStrLn s msg v =
+  hPutStrLn (getSinkHandle s) msg >> pure v
+
+chooseTraceFunOnTh :: Show s => TraceEmbraceConfig -> s -> Q Exp
+chooseTraceFunOnTh c s =
+  case c ^. #mode of
+    TraceDisabled -> fail $ "Dead code on" <> show s
+    TraceStd -> pure $ VarE 'T.trace
+    TraceUnsafeIo snk -> [| unsafePutStrLn snk |]
+    TraceEvent -> pure $ VarE 'T.traceEvent
 
 tr :: Q Exp -> String -> Q Exp
 tr idF rawMsg = do
   c <- getConfig
   traceG c idF (go c) rawMsg
   where
-    go c s fmt = do
-      let trFun = case c ^. #mode of
-                    TraceDisabled -> error $ "Dead code on" <> show s
-                    TraceStd -> 'T.trace
-                    TraceUnsafeIo -> 'unsafePutStrLn
-                    TraceEvent -> 'T.traceEvent
-      [| \x -> unwrap ($(varE trFun) $(traceMessage s fmt svars) (wrap x)) |]
+    go c s fmt =
+      [| \x -> unwrap ($(chooseTraceFunOnTh c s) $(traceMessage s fmt svars) (wrap x)) |]
 
 tw :: Q Exp -> String -> Q Exp
 tw idF rawMsg = do
   c <- getConfig
   traceG c idF (go c) rawMsg
   where
-    go c s fmt = do
-      let trFun = case c ^. #mode of
-                    TraceDisabled -> error $ "Dead code on" <> show s
-                    TraceStd -> 'T.trace
-                    TraceUnsafeIo -> 'unsafePutStrLn
-                    TraceEvent -> 'T.traceEvent
-      [| \x -> unwrap ($(varE trFun)
+    go c s fmt =
+      [| \x -> unwrap ($(chooseTraceFunOnTh c s)
                         ($(traceMessage s fmt svarsWith) x)
                         (wrap x))
        |]
@@ -320,7 +333,7 @@ trIo idF rawMsg = do
       let trFun = case c ^. #mode of
                     TraceDisabled -> error $ "Dead code on" <> show s
                     TraceStd -> 'T.traceIO
-                    TraceUnsafeIo -> 'safePutStrLn
+                    TraceUnsafeIo _ -> 'safePutStrLn
                     TraceEvent -> 'T.traceEventIO
       [| $(varE trFun) $(traceMessage s fmt svars) |]
 

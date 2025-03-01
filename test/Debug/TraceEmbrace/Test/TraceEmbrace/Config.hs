@@ -3,18 +3,19 @@ module Debug.TraceEmbrace.Test.TraceEmbrace.Config where
 import Control.Concurrent.MVar
 import Control.Exception
 import Control.Lens
+import Control.Monad
 import Data.Cache.LRU
 import Data.Generics.Labels ()
 import Data.IORef
 import Data.Maybe
 import Debug.TraceEmbrace.Config
-import Debug.TraceEmbrace.Config.Type.EnvVar
-import Debug.TraceEmbrace.Config.Type.Level
-import Debug.TraceEmbrace.Config.Type.TraceMessage
 import Debug.TraceEmbrace.Internal.TH
 import Language.Haskell.TH.Syntax
 import Refined
+import System.Directory
 import System.Environment
+import System.IO
+import System.IO.Temp
 
 positionOnly :: TraceMessageFormat
 positionOnly =
@@ -66,7 +67,14 @@ thresholdConfig = v & #levels .~ mkPrefixTree (emptyPrefixTraceLevel Info)
 
 setConfig :: TraceEmbraceConfig -> Q ()
 setConfig c =
-  runIO (atomicWriteIORef traceIfConfigRef (Just c))
+  runIO (do closeUnsafeIoSink
+            atomicWriteIORef traceIfConfigRef (Just c))
+
+closeUnsafeIoSink :: IO ()
+closeUnsafeIoSink = do
+  atomicModifyIORef' unsafeIoSink (\x -> (Nothing, x)) >>= \case
+    Nothing -> pure ()
+    Just h -> hClose h
 
 withEnv :: String -> String -> IO a -> IO a
 withEnv evar val a = do
@@ -90,3 +98,10 @@ withPrefixEnvVar c val a =
 
 poisonedId :: Q Exp
 poisonedId = [| \x -> x + 1 |]
+
+fileSynkTmp :: FilePath
+fileSynkTmp =
+  $(LitE . StringL <$> (runIO (do
+                                  f <- emptySystemTempFile "unsafeIoSinkFile.log"
+                                  doesFileExist f >>= flip when (removeFile f)
+                                  pure f)))

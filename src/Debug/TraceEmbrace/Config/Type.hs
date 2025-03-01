@@ -2,23 +2,30 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE NoFieldSelectors #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
-module Debug.TraceEmbrace.Config.Type where
+module Debug.TraceEmbrace.Config.Type
+  ( module E
+  , YamlConfigG (..)
+  , YamlConfig
+  , YamlConfigMaybe
+  , TraceEmbraceConfig (..)
+  ) where
 
 import Control.Applicative
 import Control.Lens hiding (levels)
 import Data.Aeson hiding (Error)
 import Data.Generics.Labels ()
 import Data.RadixTree.Word8.Strict qualified as T
-import Debug.TraceEmbrace.Config.Type.EnvVar
-import Debug.TraceEmbrace.Config.Type.Level
-import Debug.TraceEmbrace.Config.Type.TraceMessage
+import Debug.TraceEmbrace.Config.Type.Mode as E
+import Debug.TraceEmbrace.Config.Type.EnvVar as E
+import Debug.TraceEmbrace.Config.Type.Level as E
+import Debug.TraceEmbrace.Config.Type.TraceMessage as E
 import Debug.TraceEmbrace.Config.Validation
 import GHC.Generics
 import Refined
 
 data YamlConfigG a
   = YamlConfig
-    { mode :: Columnar a IdPred SinkMode
+    { mode :: Columnar a SinkModeP SinkMode
     , version :: Columnar a (And (GreaterThan 0) (LessThan 2)) Int
     , traceMessage :: Columnar a IdPred (TraceMessageFormatG a)
     , levels :: Columnar a HaskellModulePrefixP [ LeveledModulePrefix ]

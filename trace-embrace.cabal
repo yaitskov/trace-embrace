@@ -106,6 +106,7 @@ library
     Debug.TraceEmbrace.Config.Type
     Debug.TraceEmbrace.Config.Type.EnvVar
     Debug.TraceEmbrace.Config.Type.Level
+    Debug.TraceEmbrace.Config.Type.Mode
     Debug.TraceEmbrace.Config.Type.TraceMessage
     Debug.TraceEmbrace.Config.Load
     Debug.TraceEmbrace.Config.Validation
@@ -165,6 +166,7 @@ test-suite test
     DuplicateRecordFields
     FlexibleContexts
     ImportQualifiedPost
+    LambdaCase
     NamedFieldPuns
     OverloadedLabels
     RecordWildCards
@@ -175,6 +177,7 @@ test-suite test
       base
     , bytestring
     , containers
+    , directory
     , filepath < 1.6
     , generic-lens
     , lens

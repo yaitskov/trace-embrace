@@ -6,8 +6,6 @@ import Data.Generics.Labels ()
 import Data.Yaml qualified as Y
 import Debug.TraceEmbrace.Internal.TH qualified as I
 import Debug.TraceEmbrace.Config
-import Debug.TraceEmbrace.Config.Type.EnvVar
-import Debug.TraceEmbrace.Config.Type.Level
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
 import System.FilePath
 import System.IO.Temp

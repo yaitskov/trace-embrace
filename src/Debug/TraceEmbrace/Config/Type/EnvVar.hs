@@ -9,17 +9,6 @@ import Data.Typeable
 import GHC.Generics
 import Refined
 
-data SinkMode
-  = TraceDisabled
-  | TraceStd
-  | TraceUnsafeIo
-  | TraceEvent
-  deriving (Eq, Show, Ord, Generic)
-
-instance ToJSON SinkMode where
-  toEncoding = genericToEncoding defaultOptions
-instance FromJSON SinkMode
-
 packageBasedEnvVarPrefix :: String
 packageBasedEnvVarPrefix = "TRACE_EMBRACE_"
 
