@@ -1,13 +1,10 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PolyKinds #-}
 module Debug.TraceIf.Config.Load where
-
 
 import Control.Concurrent.MVar
 import Control.Exception
-import Control.Lens
 import Data.Cache.LRU as LRU
 import Data.Char
 import Data.Generics.Labels ()
@@ -17,39 +14,16 @@ import Data.RadixTree.Word8.Strict qualified as T
 import Data.Yaml as Y
 import Debug.Trace (traceIO)
 import Debug.TraceIf.Config.Type
+import Debug.TraceIf.Config.Type.EnvVar
+import Debug.TraceIf.Config.Type.Level
+import Debug.TraceIf.Config.Type.TraceMessage
+import Debug.TraceIf.Config.Validation
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import Refined
 import System.Directory
 import System.Environment (lookupEnv)
 import System.IO.Unsafe
-
-type family Col f r a where
-  Col Identity r a = Refined r a
-  Col Maybe r a = Maybe a
-
-data Foo a  = Foo
-    { foo1 :: Col a (SizeLessThan 4) String -- ^ @"; "@ is default
-    , foo2 :: Col a (NonEmpty) String -- ^ @": "@ is default
-    -- , retValPrefix :: Columnar a String -- ^ @" => "@
-    -- , traceLinePattern :: Columnar a [TraceMessageElement]
-    }
-
-type FooMay = Foo Maybe
-type FooI = Foo Identity
-
-mapLeft :: (a -> b) -> Either a c -> Either b c
-mapLeft f = \case
-  Left x -> Left $ f x
-  Right o -> Right o
-
-refineS :: forall {k} (p :: k) x. Predicate p x => String -> x -> Either String (Refined p x)
-refineS fieldName =
-  mapLeft ((("Field [" <> fieldName <> "] is not valid due: ") <>) . show) . refine
-
-required :: forall {k} {p :: k} {a}. Predicate p a => String -> Maybe a -> Either String (Refined p a)
-required s v =
-  (maybe (Left $ "[" <> s <> "] field is required") pure v) >>= refineS s
 
 validateTraceMessageFormat ::
   String ->

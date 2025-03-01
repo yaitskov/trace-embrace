@@ -6,6 +6,8 @@ import Data.Generics.Labels ()
 import Data.Yaml qualified as Y
 import Debug.TraceIf.Internal.TH qualified as I
 import Debug.TraceIf.Config
+import Debug.TraceIf.Config.Type.EnvVar
+import Debug.TraceIf.Config.Type.Level
 import Debug.TraceIf.Test.TraceIf.Config
 import System.FilePath
 import System.IO.Temp

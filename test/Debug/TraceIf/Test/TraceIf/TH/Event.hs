@@ -1,7 +1,7 @@
 module Debug.TraceIf.Test.TraceIf.TH.Event where
 
 import Control.Lens
-import Debug.TraceIf.Config
+import Debug.TraceIf.Config.Type.EnvVar
 import Debug.TraceIf.Internal.TH
 import Debug.TraceIf.Test.TraceIf.Config
 import Test.Tasty.HUnit ((@=?))

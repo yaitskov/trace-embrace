@@ -4,7 +4,7 @@ module Debug.TraceIf.Test.TraceIf.Yaml where
 
 import Data.Text
 import Data.Yaml as Y
-import Debug.TraceIf.Config.Type
+import Debug.TraceIf.Config.Type.Level
 import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.QuickCheck
 

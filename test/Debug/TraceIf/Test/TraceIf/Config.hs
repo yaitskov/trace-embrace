@@ -8,6 +8,9 @@ import Data.Generics.Labels ()
 import Data.IORef
 import Data.Maybe
 import Debug.TraceIf.Config
+import Debug.TraceIf.Config.Type.EnvVar
+import Debug.TraceIf.Config.Type.Level
+import Debug.TraceIf.Config.Type.TraceMessage
 import Debug.TraceIf.Internal.TH
 import Language.Haskell.TH.Syntax
 import Refined

@@ -14,7 +14,9 @@ import Debug.TraceIf.If
 import Debug.TraceIf.Show
 import Debug.TraceIf.FileIndex
 import Debug.TraceIf.Config
-
+import Debug.TraceIf.Config.Type.EnvVar
+import Debug.TraceIf.Config.Type.Level
+import Debug.TraceIf.Config.Type.TraceMessage
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import Prelude hiding (Show (..))

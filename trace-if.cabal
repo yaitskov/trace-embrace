@@ -103,7 +103,11 @@ library
     Debug.TraceIf
     Debug.TraceIf.Config
     Debug.TraceIf.Config.Type
+    Debug.TraceIf.Config.Type.EnvVar
+    Debug.TraceIf.Config.Type.Level
+    Debug.TraceIf.Config.Type.TraceMessage
     Debug.TraceIf.Config.Load
+    Debug.TraceIf.Config.Validation
     Debug.TraceIf.FileIndex
     Debug.TraceIf.If
     Debug.TraceIf.Internal.TH
@@ -125,6 +129,7 @@ library
     FlexibleInstances
     ImportQualifiedPost
     LambdaCase
+    MultiParamTypeClasses
     OverloadedLabels
     ScopedTypeVariables
     StandaloneDeriving
