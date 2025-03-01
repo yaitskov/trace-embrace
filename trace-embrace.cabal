@@ -1,6 +1,6 @@
 cabal-version:   3.0
 name:            trace-embrace
-version:         0.0.2
+version:         1.0.0
 license:         BSD-3-Clause
 license-file:    LICENSE
 category:        Development
