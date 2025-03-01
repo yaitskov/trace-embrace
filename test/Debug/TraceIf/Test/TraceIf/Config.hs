@@ -10,30 +10,36 @@ import Data.Maybe
 import Debug.TraceIf.Config
 import Debug.TraceIf.Internal.TH
 import Language.Haskell.TH.Syntax
+import Refined
 import System.Environment
 
 positionOnly :: TraceMessageFormat
 positionOnly =
   defaultTraceMessageFormat
-  { traceLinePattern =
-    [ FullyQualifiedModule
-    , Delimiter "::"
-    , FunctionName
-    ]
+  { traceLinePattern = $$(refineTH
+                          [ FullyQualifiedModule
+                          , Delimiter "::"
+                          , FunctionName
+                          ])
+                       :: Refined NonEmpty [TraceMessageElement]
   }
 
 lineOnly :: TraceMessageFormat
 lineOnly =
   defaultTraceMessageFormat
-  { traceLinePattern =
+  { traceLinePattern = $$(refineTH
     [ LineNumber
     , Delimiter ":"
-    ]
+    ]) :: Refined NonEmpty [TraceMessageElement]
   }
 
 msgAndVarsOnly :: TraceMessageFormat
 msgAndVarsOnly =
-  defaultTraceMessageFormat { traceLinePattern = [ LiteralMessage, Variables ] }
+  defaultTraceMessageFormat
+  { traceLinePattern =
+      $$(refineTH [ LiteralMessage, Variables ]) ::
+      Refined NonEmpty [TraceMessageElement]
+  }
 
 trConstMsg :: String -> Q Exp
 trConstMsg msgAndVars = traceMessage (TrMsgAndVars msgAndVars) msgAndVarsOnly svars
@@ -48,9 +54,12 @@ two :: Int
 two = 2
 
 thresholdConfig :: TraceIfConfig
-thresholdConfig =
-  (fromJust (yaml2Config <$> validateYamlConfig newYamlConfig))
-  & #levels .~ mkPrefixTree (emptyPrefixTraceLevel Info)
+thresholdConfig = v & #levels .~ mkPrefixTree (emptyPrefixTraceLevel Info)
+ where
+   v :: TraceIfConfig
+   v = case (yaml2Config <$> validateYamlConfig newYamlConfig) of
+         Right r -> r
+         Left e -> error e
 
 setConfig :: TraceIfConfig -> Q ()
 setConfig c =

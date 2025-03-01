@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+-- {-# OPTIONS_GHC -ddump-splices #-}
 module Debug.TraceIf.Test.TraceIf.TH.Format.Lifted where
 
 import Data.ByteString.Lazy

@@ -1,10 +1,13 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedRecordDot #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PolyKinds #-}
 module Debug.TraceIf.Config.Load where
+
 
 import Control.Concurrent.MVar
 import Control.Exception
+import Control.Lens
 import Data.Cache.LRU as LRU
 import Data.Char
 import Data.Generics.Labels ()
@@ -16,26 +19,58 @@ import Debug.Trace (traceIO)
 import Debug.TraceIf.Config.Type
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
+import Refined
 import System.Directory
-import System.IO.Unsafe
 import System.Environment (lookupEnv)
+import System.IO.Unsafe
 
-validateTraceMessageFormat :: TraceMessageFormatMaybe -> Maybe TraceMessageFormat
-validateTraceMessageFormat ytc =
-  TraceMessageFormat
-  <$> ytc.entrySeparator
-  <*> ytc.keyValueSeparator
-  <*> ytc.retValPrefix
-  <*> ytc.traceLinePattern
+type family Col f r a where
+  Col Identity r a = Refined r a
+  Col Maybe r a = Maybe a
 
-validateYamlConfig :: YamlConfigMaybe -> Maybe YamlConfig
+data Foo a  = Foo
+    { foo1 :: Col a (SizeLessThan 4) String -- ^ @"; "@ is default
+    , foo2 :: Col a (NonEmpty) String -- ^ @": "@ is default
+    -- , retValPrefix :: Columnar a String -- ^ @" => "@
+    -- , traceLinePattern :: Columnar a [TraceMessageElement]
+    }
+
+type FooMay = Foo Maybe
+type FooI = Foo Identity
+
+mapLeft :: (a -> b) -> Either a c -> Either b c
+mapLeft f = \case
+  Left x -> Left $ f x
+  Right o -> Right o
+
+refineS :: forall {k} (p :: k) x. Predicate p x => String -> x -> Either String (Refined p x)
+refineS fieldName =
+  mapLeft ((("Field [" <> fieldName <> "] is not valid due: ") <>) . show) . refine
+
+required :: forall {k} {p :: k} {a}. Predicate p a => String -> Maybe a -> Either String (Refined p a)
+required s v =
+  (maybe (Left $ "[" <> s <> "] field is required") pure v) >>= refineS s
+
+validateTraceMessageFormat ::
+  String ->
+  TraceMessageFormatMaybe ->
+  Either String (Refined IdPred TraceMessageFormat)
+validateTraceMessageFormat fieldName ytc =
+  refineS fieldName =<< TraceMessageFormat
+  <$> required "entrySeparator" ytc.entrySeparator
+  <*> required "keyValueSeparator" ytc.keyValueSeparator
+  <*> required "retValPrefix" ytc.retValPrefix
+  <*> required "traceLinePattern" ytc.traceLinePattern
+
+validateYamlConfig :: YamlConfigMaybe -> Either String YamlConfig
 validateYamlConfig yc =
   YamlConfig
-  <$> yc.mode
-  <*> yc.version
-  <*> (yc.traceMessage >>= validateTraceMessageFormat)
-  <*> yc.levels
-  <*> yc.runtimeLevelsOverrideEnvVar
+  <$> required "mode" yc.mode
+  <*> required "version" yc.version
+  <*> (required  "traceMessage" yc.traceMessage >>=
+       validateTraceMessageFormat "traceMessage" . unrefine @IdPred)
+  <*> required "levels" yc.levels
+  <*> required "runtimeLevelsOverrideEnvVar" yc.runtimeLevelsOverrideEnvVar
 
 defaultTraceMessageFormatYaml :: TraceMessageFormatMaybe
 defaultTraceMessageFormatYaml = TraceMessageFormat
@@ -55,8 +90,8 @@ defaultTraceMessageFormatYaml = TraceMessageFormat
 
 defaultTraceMessageFormat :: TraceMessageFormat
 defaultTraceMessageFormat =
-  maybe (error "defaultTraceMessageFormatYaml is partial") id $
-    validateTraceMessageFormat defaultTraceMessageFormatYaml
+  either (error "defaultTraceMessageFormatYaml is partial") unrefine $
+    validateTraceMessageFormat "traceMessageFormat" defaultTraceMessageFormatYaml
 
 newYamlConfig :: YamlConfigMaybe
 newYamlConfig =
@@ -68,23 +103,25 @@ newYamlConfig =
   , runtimeLevelsOverrideEnvVar = Just CapsPackageName
   }
 
+defaultYamlConfig :: YamlConfigMaybe
+defaultYamlConfig = newYamlConfig { version = Nothing }
+
 loadYamlConfig :: IO YamlConfig
 loadYamlConfig = do
   doesFileExist fp >>= \case
-    True -> configFromJust . (<> nc) =<< catch (Y.decodeFileThrow fp) badYaml
+    True -> configFromJust . (<> defaultYamlConfig) =<< catch (Y.decodeFileThrow fp) badYaml
     False -> do
-      Y.encodeFile fp nc
+      Y.encodeFile fp newYamlConfig
       traceIO $ "New default config trace-if file is generated: [" <> fp <> "]"
-      configFromJust nc
+      configFromJust newYamlConfig
   where
     configFromJust :: YamlConfigMaybe -> IO YamlConfig
     configFromJust ycm =
-      maybe (fail $ "YamlConfig is not valid: " <> show ycm) pure
-      $ validateYamlConfig ycm
+      either (\e -> fail $ show ycm <> "\nNot valid due: " <> e) pure
+        $ validateYamlConfig ycm
     badYaml e =
       fail $ "Fail to parse " <> show fp <> "file due:\n" <> prettyPrintParseException e
       <> "\nRename or delete existing config file to get default config."
-    nc = newYamlConfig
     fp = traceIfConfigFileName
 
 traceIfConfigFileName :: FilePath
@@ -105,9 +142,9 @@ mkPrefixTree = L.foldl' go T.empty
 
 yaml2Config :: YamlConfig -> TraceIfConfig
 yaml2Config yc =
-  TraceIfConfig (yc.mode) (yc.traceMessage)
-  (mkPrefixTree $ yc.levels)
-  (yc.runtimeLevelsOverrideEnvVar)
+  TraceIfConfig (unrefine $ yc.mode) (unrefine $ yc.traceMessage)
+  (mkPrefixTree . unrefine $ yc.levels)
+  (unrefine $ yc.runtimeLevelsOverrideEnvVar)
 
 getConfig :: Q TraceIfConfig
 getConfig = go
@@ -168,7 +205,12 @@ getRuntimeConfig evar = modifyMVar runtimeTraceIfConfigRef go
 markerConfig :: TraceIfConfig
 markerConfig = TraceIfConfig
     { mode = TraceEvent
-    , traceMessage = TraceMessageFormat "" "" "" [ ModuleName, Delimiter "::", FunctionName ]
+    , traceMessage =
+        TraceMessageFormat
+        ($$(refineTH "e") :: Refined SeparatorValidator String)
+        ($$(refineTH "e") :: Refined SeparatorValidator String)
+        ($$(refineTH "e") :: Refined SeparatorValidator String)
+        ($$(refineTH [ ModuleName, Delimiter "::", FunctionName ]) :: Refined NonEmpty [TraceMessageElement])
     , levels = mkPrefixTree traceAll
     , runtimeLevelsOverrideEnvVar = Ignored
     }

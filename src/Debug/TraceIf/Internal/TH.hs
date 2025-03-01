@@ -19,6 +19,7 @@ import Language.Haskell.TH
 import Language.Haskell.TH.Syntax
 import Prelude hiding (Show (..))
 import Prelude qualified as P
+import Refined
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf
 
@@ -126,9 +127,9 @@ svars tmf (VarsPart vars) = MT.lift $
               reportError $ printf "no variable [%s]" vs
               [| $(lift vs) |]
             Just vn ->
-              [| $(lift $ tmf ^. #entrySeparator)
+              [| $(lift . unrefine $ tmf ^. #entrySeparator)
                  <> $(lift vs)
-                 <> $(lift $ tmf ^. #keyValueSeparator)
+                 <> $(lift . unrefine $ tmf ^. #keyValueSeparator)
                  <> $(varE f) $(varE vn)
                |]
 
@@ -147,7 +148,7 @@ svarsWith :: SVarsFun
 svarsWith tmf vp =
   get >>= maybe (calret (put . Just) =<< MT.lift (newName "retVal")) pure >>= \retValVarName -> MT.lift $
   [| $(evalStateT (svars tmf vp) Nothing)
-     <> [ $(lift $ tmf ^. #retValPrefix)
+     <> [ $(lift . unrefine $ tmf ^. #retValPrefix)
         , show $(varE retValVarName)
         ]
      {- :: (Rewrap a b, Show a) => a -> [String] -}
@@ -167,7 +168,7 @@ traceMessage mavs tmf svarsFun =
       [| \ $(varP retValVarName) -> concat2 $(pure $ ListE exprList) |]
   where
     itemExprs :: SVarsFunM [Exp]
-    itemExprs = sequence (genItem <$> tmf ^. #traceLinePattern)
+    itemExprs = sequence (genItem <$> (unrefine (tmf ^. #traceLinePattern)))
     loc = MT.lift location
     strL = ListE . (:[]) . LitE . StringL
     pStrL = pure . strL

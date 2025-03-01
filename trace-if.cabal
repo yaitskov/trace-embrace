@@ -93,6 +93,7 @@ library
     generic-lens < 3.0,
     ghc < 9.12,
     radix-tree < 2.0,
+    refined < 1.0,
     tagged,
     template-haskell < 2.24.0.0,
     text < 3.0,
@@ -115,6 +116,7 @@ library
   default-language: Haskell2010
   default-extensions:
     BangPatterns
+    DataKinds
     DeriveGeneric
     DeriveLift
     DisambiguateRecordFields
@@ -127,6 +129,7 @@ library
     ScopedTypeVariables
     StandaloneDeriving
     TemplateHaskell
+    TypeApplications
     TypeFamilies
 
 test-suite test
@@ -170,6 +173,7 @@ test-suite test
     , generic-lens
     , lens
     , lrucache < 1.3
+    , refined
     , tasty
     , tasty-discover
     , tasty-hunit

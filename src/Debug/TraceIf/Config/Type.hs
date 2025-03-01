@@ -12,6 +12,7 @@ import Data.RadixTree.Word8.Strict qualified as T
 import Data.Text
 import GHC.Generics
 import Language.Haskell.TH.Syntax
+import Refined
 
 data SinkMode
   = TraceDisabled
@@ -50,32 +51,33 @@ data TraceMessageElement
   | FunctionName -- ^ Function or method name containing tracing
   | LineNumber -- ^ Line number with tracing
   | Delimiter String -- | TraceMessageElement delimiter
-  deriving (Eq, Show, Generic)
+  deriving (Eq, Show, Generic, Lift)
 
 instance ToJSON TraceMessageElement where
   toEncoding = genericToEncoding defaultOptions
 instance FromJSON TraceMessageElement
 
-type family Columnar f a where
-  Columnar Identity a = a
-  Columnar Maybe a = Maybe a
+type family Columnar f r a where
+  Columnar Identity r a = Refined r a
+  Columnar Maybe _ a = Maybe a
 
+type SeparatorValidator = And (SizeLessThan 5) NonEmpty
 data TraceMessageFormatG a
   = TraceMessageFormat
-    { entrySeparator :: Columnar a String -- ^ @"; "@ is default
-    , keyValueSeparator :: Columnar a String -- ^ @": "@ is default
-    , retValPrefix :: Columnar a String -- ^ @" => "@
-    , traceLinePattern :: Columnar a [TraceMessageElement]
+    { entrySeparator :: Columnar a SeparatorValidator String -- ^ @"; "@ is default
+    , keyValueSeparator :: Columnar a SeparatorValidator String -- ^ @": "@ is default
+    , retValPrefix :: Columnar a SeparatorValidator String -- ^ @" => "@
+    , traceLinePattern :: Columnar a NonEmpty [TraceMessageElement]
     }
 
 -- watch out for derivation order: https://gitlab.haskell.org/ghc/ghc/-/issues/25798
-entrySeparator :: Lens' (TraceMessageFormatG a) (Columnar a String)
+entrySeparator :: Lens' (TraceMessageFormatG a) (Columnar a SeparatorValidator String)
 entrySeparator = lens (.entrySeparator) $ \x a -> x { entrySeparator = a }
-keyValueSeparator :: Lens' (TraceMessageFormatG a) (Columnar a String)
+keyValueSeparator :: Lens' (TraceMessageFormatG a) (Columnar a SeparatorValidator String)
 keyValueSeparator = lens (.keyValueSeparator) $ \x a -> x { keyValueSeparator = a }
-retValPrefix :: Lens' (TraceMessageFormatG a) (Columnar a String)
+retValPrefix :: Lens' (TraceMessageFormatG a) (Columnar a SeparatorValidator String)
 retValPrefix = lens (.retValPrefix) $ \x a -> x { retValPrefix = a }
-traceLinePattern :: Lens' (TraceMessageFormatG a) (Columnar a [TraceMessageElement])
+traceLinePattern :: Lens' (TraceMessageFormatG a) (Columnar a NonEmpty [TraceMessageElement])
 traceLinePattern = lens (.traceLinePattern) $ \x a -> x { traceLinePattern = a }
 
 type TraceMessageFormat = TraceMessageFormatG Identity
@@ -120,7 +122,7 @@ traceLevelToChar = \case
   TracingDisabled -> "#"
 
 charToLevel :: String -> (TraceLevel, String)
-charToLevel [] = (TracingDisabled, "")
+charToLevel [] = (Info, "")
 charToLevel s@(l:m)=
   case l of
     '-' -> (Trace, m)
@@ -146,23 +148,12 @@ instance FromJSON LeveledModulePrefix where
 
 data YamlConfigG a
   = YamlConfig
-    { mode :: Columnar a SinkMode
-    , version :: Columnar a Int
-    , traceMessage :: Columnar a (TraceMessageFormatG a)
-    , levels :: Columnar a [ LeveledModulePrefix ]
-    , runtimeLevelsOverrideEnvVar :: Columnar a EnvironmentVariable
+    { mode :: Columnar a IdPred SinkMode
+    , version :: Columnar a (And (GreaterThan 0) (LessThan 2)) Int
+    , traceMessage :: Columnar a IdPred (TraceMessageFormatG a)
+    , levels :: Columnar a IdPred [ LeveledModulePrefix ]
+    , runtimeLevelsOverrideEnvVar :: Columnar a IdPred EnvironmentVariable
     }
-
--- mode :: Lens' (YamlConfigG a) (Columnar a SinkMode)
--- mode = lens (._mode) $ \x a -> x { _mode = a }
--- version :: Lens' (YamlConfigG a) (Columnar a Int)
--- version = lens _version $ \x a -> x { _version = a }
--- traceMessage :: Lens' (YamlConfigG a) (Columnar a  (TraceMessageFormatG a))
--- traceMessage = lens _traceMessage $ \x a -> x { _traceMessage = a }
--- levels :: Lens' (YamlConfigG a) (Columnar a [ LeveledModulePrefix ])
--- levels = lens _levels $ \x a -> x { _levels = a }
--- runtimeLevelsOverrideEnvVar :: Lens' (YamlConfigG a) (Columnar a EnvironmentVariable)
--- runtimeLevelsOverrideEnvVar = lens _runtimeLevelsOverrideEnvVar $ \x a -> x { _runtimeLevelsOverrideEnvVar = a }
 
 type YamlConfig = YamlConfigG Identity
 type YamlConfigMaybe = YamlConfigG Maybe

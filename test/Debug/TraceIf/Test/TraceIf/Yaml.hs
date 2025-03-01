@@ -8,7 +8,6 @@ import Debug.TraceIf.Config.Type
 import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.QuickCheck
 
-
 instance Arbitrary TraceLevel where
   arbitrary = arbitraryBoundedEnum
 
@@ -24,7 +23,7 @@ prop_dyn_conf_marshalling l t =
     e = LeveledModulePrefix l t
 
 unit_dyn_conf_golden :: IO ()
-unit_dyn_conf_golden = Y.encode l @=? "-Data\n!Control\nSystem.\n-Unsafe\n"
+unit_dyn_conf_golden = Y.encode l @=? "- '|Data'\n- '!Control'\n- System.\n- -Unsafe\n"
   where
     l = [ LeveledModulePrefix Error "Data"
         , LeveledModulePrefix Warning "Control"
