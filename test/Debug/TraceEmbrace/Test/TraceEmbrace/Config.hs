@@ -68,7 +68,7 @@ thresholdConfig = v & #levels .~ mkPrefixTree (emptyPrefixTraceLevel Info)
 setConfig :: TraceEmbraceConfig -> Q ()
 setConfig c =
   runIO (do closeUnsafeIoSink
-            atomicWriteIORef traceIfConfigRef (Just c))
+            atomicWriteIORef traceEmbraceConfigRef (Just c))
 
 closeUnsafeIoSink :: IO ()
 closeUnsafeIoSink = do

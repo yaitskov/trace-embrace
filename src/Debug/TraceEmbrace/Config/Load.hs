@@ -95,14 +95,14 @@ loadYamlConfig = do
     badYaml e =
       fail $ "Fail to parse " <> show fp <> "file due:\n" <> prettyPrintParseException e
       <> "\nRename or delete existing config file to get default config."
-    fp = traceIfConfigFileName
+    fp = traceEmbraceConfigFileName
 
-traceIfConfigFileName :: FilePath
-traceIfConfigFileName = "trace-embrace.yaml"
+traceEmbraceConfigFileName :: FilePath
+traceEmbraceConfigFileName = "trace-embrace.yaml"
 
-traceIfConfigRef :: IORef (Maybe TraceEmbraceConfig)
-traceIfConfigRef = unsafePerformIO (newIORef Nothing)
-{-# NOINLINE traceIfConfigRef #-}
+traceEmbraceConfigRef :: IORef (Maybe TraceEmbraceConfig)
+traceEmbraceConfigRef = unsafePerformIO (newIORef Nothing)
+{-# NOINLINE traceEmbraceConfigRef #-}
 
 unsafeIoSink :: IORef (Maybe Handle)
 unsafeIoSink = unsafePerformIO (newIORef Nothing)
@@ -128,11 +128,11 @@ yaml2Config yc =
 getConfig :: Q TraceEmbraceConfig
 getConfig = go
   where
-    go = runIO (readIORef traceIfConfigRef) >>= \case
+    go = runIO (readIORef traceEmbraceConfigRef) >>= \case
       Nothing -> do
         c <- yaml2Config <$> runIO loadYamlConfig
-        runIO (atomicWriteIORef traceIfConfigRef (Just c))
-        addDependentFile traceIfConfigFileName
+        runIO (atomicWriteIORef traceEmbraceConfigRef (Just c))
+        addDependentFile traceEmbraceConfigFileName
         pure c
       Just c -> pure c
 
