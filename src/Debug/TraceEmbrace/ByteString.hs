@@ -27,3 +27,9 @@ instance Show (ShowTrace a) => Show (ShowTrace (Maybe a)) where
 
 instance Show (ShowTrace a) => Show (ShowTrace (Tagged t a)) where
   show (ShowTrace x) = show (ShowTrace <$> x)
+
+instance {-# OVERLAPPABLE #-} Show (ShowTrace a) => Show (ShowTrace [a]) where
+  show (ShowTrace x) = show (ShowTrace <$> x)
+
+instance {-# OVERLAPPING #-} Show (ShowTrace a) => Show (ShowTrace [Tagged t a]) where
+  show (ShowTrace x) = show (fmap ShowTrace <$> x)
