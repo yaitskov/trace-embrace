@@ -44,6 +44,7 @@ let
       ghcid
       hlint
       niv
+      pandoc
     ]) ++ [ hls ];
     shellHook = ''
       export PS1='$ '

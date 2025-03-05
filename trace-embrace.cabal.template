@@ -1,0 +1,134 @@
+cabal-version:   3.0
+name:            trace-embrace
+version:         1.0.0
+license:         BSD-3-Clause
+license-file:    LICENSE
+category:        Development
+author:          Daniil Iaitskov <dyaitskov@gmail.com>
+maintainer:      Daniil Iaitskov <dyaitskov@gmail.com>
+stability:       experimental
+synopsis:        Conditional Debug.Trace controlled via environment variable
+homepage:        https://github.com/yaitskov/trace-embrace
+bug-reports:     https://github.com/yaitskov/trace-embrace/issues
+build-type:      Simple
+description:
+
+tested-with:
+  GHC == 9.10.1
+
+library
+  build-depends:
+    aeson < 3.0,
+    base < 5,
+    bytestring > 0.11 && < 0.12.3,
+    containers < 0.9,
+    deepseq < 1.8,
+    directory < 2.0,
+    lens < 6.0,
+    lrucache < 1.3,
+    generic-lens < 3.0,
+    ghc < 9.12,
+    radix-tree < 2.0,
+    refined < 1.0,
+    tagged < 1.0,
+    template-haskell < 2.24.0.0,
+    text < 3.0,
+    transformers < 1.0,
+    yaml < 0.12,
+  exposed-modules:
+    Debug.TraceEmbrace
+    Debug.TraceEmbrace.Config
+    Debug.TraceEmbrace.Config.Type
+    Debug.TraceEmbrace.Config.Type.EnvVar
+    Debug.TraceEmbrace.Config.Type.Level
+    Debug.TraceEmbrace.Config.Type.Mode
+    Debug.TraceEmbrace.Config.Type.TraceMessage
+    Debug.TraceEmbrace.Config.Load
+    Debug.TraceEmbrace.Config.Validation
+    Debug.TraceEmbrace.FileIndex
+    Debug.TraceEmbrace.Internal.Rewrap
+    Debug.TraceEmbrace.Internal.TH
+    Debug.TraceEmbrace.Show
+    Debug.TraceEmbrace.ShowTh
+    Debug.TraceEmbrace.TH
+
+  ghc-options: -Wall
+  hs-source-dirs: src
+  default-language: Haskell2010
+  default-extensions:
+    BangPatterns
+    DataKinds
+    DeriveGeneric
+    DeriveLift
+    DisambiguateRecordFields
+    DuplicateRecordFields
+    FlexibleContexts
+    FlexibleInstances
+    ImportQualifiedPost
+    LambdaCase
+    MultiParamTypeClasses
+    OverloadedLabels
+    ScopedTypeVariables
+    StandaloneDeriving
+    TemplateHaskell
+    TypeApplications
+    TypeFamilies
+
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: Driver.hs
+  other-modules:
+    Debug.TraceEmbrace.Test.TraceEmbrace.Config
+    Debug.TraceEmbrace.Test.TraceEmbrace.DemoIndex
+    Debug.TraceEmbrace.Test.TraceEmbrace.FileIndex
+    Debug.TraceEmbrace.Test.TraceEmbrace.TH
+    Debug.TraceEmbrace.Test.TraceEmbrace.TH.Event
+    Debug.TraceEmbrace.Test.TraceEmbrace.TH.Format.Lifted
+    Debug.TraceEmbrace.Test.TraceEmbrace.TH.Format.Unboxed
+    Debug.TraceEmbrace.Test.TraceEmbrace.TH.Line
+    Debug.TraceEmbrace.Test.TraceEmbrace.TH.Threshold
+    Debug.TraceEmbrace.Test.TraceEmbrace.Yaml
+    Demo
+    Discovery
+    Paths_trace_embrace
+  autogen-modules:
+    Paths_trace_embrace
+  hs-source-dirs:
+    test
+  default-extensions:
+    BangPatterns
+    DisambiguateRecordFields
+    DuplicateRecordFields
+    FlexibleContexts
+    ImportQualifiedPost
+    LambdaCase
+    NamedFieldPuns
+    OverloadedLabels
+    RecordWildCards
+    ScopedTypeVariables
+    TemplateHaskell
+  ghc-options: -Wall -rtsopts -threaded -main-is Driver
+  build-depends:
+      base
+    , bytestring
+    , containers
+    , directory
+    , filepath < 1.6
+    , generic-lens
+    , lens
+    , lrucache < 1.3
+    , refined
+    , tasty
+    , tasty-discover
+    , tasty-hunit
+    , tasty-quickcheck
+    , template-haskell
+    , temporary < 1.5
+    , text
+    , trace-embrace
+    , yaml
+  default-language: Haskell2010
+
+source-repository head
+  type:     git
+  location: https://github.com/yaitskov/trace-embrace.git
