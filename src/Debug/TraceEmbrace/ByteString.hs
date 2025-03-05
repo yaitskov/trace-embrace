@@ -1,11 +1,7 @@
-{-# OPTIONS_GHC -Wno-orphans #-}
 module Debug.TraceEmbrace.ByteString where
 
 import Data.ByteString.Lazy.Internal qualified as L
 import Data.ByteString.Internal (ByteString(..))
-import Debug.TraceEmbrace.Show
-import Prelude hiding (Show (..))
-import Prelude qualified as P
 
 -- | Show 'ByteString' structure.
 --
@@ -14,8 +10,11 @@ showLbsAsIs :: L.ByteString -> [ByteString]
 showLbsAsIs L.Empty = []
 showLbsAsIs (L.Chunk x xs) = x : showLbsAsIs xs
 
-instance {-# OVERLAPPING #-} Show (ShowTrace L.ByteString) where
-  show = P.show . showLbsAsIs . unShowTrace
+-- | Wrap value which has opaque 'Show' instance.
+newtype ShowTrace a = ShowTrace { unShowTrace :: a }
 
-instance {-# OVERLAPPING #-} Show (ShowTrace ByteString) where
-  show (ShowTrace bs@(BS fp len)) = "BS " <> P.show fp <> " " <> P.show len <> ":" <> P.show bs
+instance Show (ShowTrace L.ByteString) where
+  show = show . showLbsAsIs . unShowTrace
+
+instance Show (ShowTrace ByteString) where
+  show (ShowTrace bs@(BS fp len)) = "BS " <> show fp <> " " <> show len <> ":" <> show bs

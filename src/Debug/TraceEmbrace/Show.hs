@@ -10,16 +10,13 @@
 -- | More detailed Show for debugging
 -- E.g. show instance of lazy ByteString hides how many
 -- chunks in the string.
-module Debug.TraceEmbrace.Show (module STh, ShowTrace (..)) where
+module Debug.TraceEmbrace.Show (module STh, module B) where
 
+import Debug.TraceEmbrace.ByteString as B
 import Debug.TraceEmbrace.ShowTh as STh
 import GHC.Exts
 import Prelude hiding (Show (..))
 import Prelude qualified as P
-
-
--- | Wrap value which has opaque 'Show' instance.
-newtype ShowTrace a = ShowTrace { unShowTrace :: a }
 
 instance Show Int# where
   show i# = P.show (I# i#) <> "#"
