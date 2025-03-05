@@ -3,9 +3,9 @@
 module Debug.TraceEmbrace.Test.TraceEmbrace.TH.Format.Lifted where
 
 import Data.ByteString.Lazy
+import Debug.TraceEmbrace.ByteString ()
 import Debug.TraceEmbrace.Internal.TH
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
-
 import Test.Tasty.HUnit ((@=?))
 
 -- not working: https://gitlab.haskell.org/ghc/ghc/-/issues/25775

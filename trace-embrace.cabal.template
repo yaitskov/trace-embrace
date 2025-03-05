@@ -37,6 +37,7 @@ library
     yaml < 0.12,
   exposed-modules:
     Debug.TraceEmbrace
+    Debug.TraceEmbrace.ByteString
     Debug.TraceEmbrace.Config
     Debug.TraceEmbrace.Config.Type
     Debug.TraceEmbrace.Config.Type.EnvVar

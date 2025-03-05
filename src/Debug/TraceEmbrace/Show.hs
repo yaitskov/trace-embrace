@@ -12,8 +12,6 @@
 -- chunks in the string.
 module Debug.TraceEmbrace.Show (module STh, ShowTrace (..)) where
 
-import Data.ByteString.Lazy.Internal qualified as L
-import Data.ByteString.Internal (ByteString(..))
 import Debug.TraceEmbrace.ShowTh as STh
 import GHC.Exts
 import Prelude hiding (Show (..))
@@ -22,19 +20,6 @@ import Prelude qualified as P
 
 -- | Wrap value which has opaque 'Show' instance.
 newtype ShowTrace a = ShowTrace { unShowTrace :: a }
-
--- | Show 'ByteString' structure.
---
--- >>> showLbsAsIs ("a" <> "b")
-showLbsAsIs :: L.ByteString -> [ByteString]
-showLbsAsIs L.Empty = []
-showLbsAsIs (L.Chunk x xs) = x : showLbsAsIs xs
-
-instance {-# OVERLAPPING #-} Show (ShowTrace L.ByteString) where
-  show = P.show . showLbsAsIs . unShowTrace
-
-instance {-# OVERLAPPING #-} Show (ShowTrace ByteString) where
-  show (ShowTrace bs@(BS fp len)) = "BS " <> P.show fp <> " " <> P.show len <> ":" <> P.show bs
 
 instance Show Int# where
   show i# = P.show (I# i#) <> "#"
