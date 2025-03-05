@@ -7,6 +7,7 @@ module Debug.TraceEmbrace.Internal.Rewrap where
 
 import GHC.Exts
 
+-- | Unlifted value wrapper to be squize throughout trace function
 class Rewrap (t :: TYPE r) b | t -> b where
   wrap :: t -> b
   unwrap :: b -> t

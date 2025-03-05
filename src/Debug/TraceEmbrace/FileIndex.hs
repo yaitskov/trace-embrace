@@ -3,7 +3,8 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
--- | Tree of line number to
+
+-- | Index functions and methods of a Haskell module by line number
 module Debug.TraceEmbrace.FileIndex where
 
 import Data.IntMap.Strict qualified as IM

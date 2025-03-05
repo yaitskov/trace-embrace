@@ -1,3 +1,4 @@
+{-# OPTIONS_HADDOCK hide #-}
 module Debug.TraceEmbrace.Internal.TH where
 
 import Control.DeepSeq
@@ -173,7 +174,6 @@ traceMessage mavs tmf svarsFun =
     loc = MT.lift location
     strL = ListE . (:[]) . LitE . StringL
     pStrL = pure . strL
-    -- Exp :: String
     genItem :: TraceMessageElement -> SVarsFunM Exp
     genItem = \case
       LiteralMessage -> pStrL . fst $ splitMessageFromVars mavs

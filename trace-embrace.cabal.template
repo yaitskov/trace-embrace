@@ -46,6 +46,7 @@ library
     Debug.TraceEmbrace.Config.Load
     Debug.TraceEmbrace.Config.Validation
     Debug.TraceEmbrace.FileIndex
+    Debug.TraceEmbrace.Haddock
     Debug.TraceEmbrace.Internal.Rewrap
     Debug.TraceEmbrace.Internal.TH
     Debug.TraceEmbrace.Show
