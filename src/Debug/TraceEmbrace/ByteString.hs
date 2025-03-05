@@ -2,7 +2,9 @@ module Debug.TraceEmbrace.ByteString where
 
 import Data.ByteString.Lazy.Internal qualified as L
 import Data.ByteString.Internal (ByteString(..))
-
+import Data.Tagged
+import Data.Maybe
+import Prelude
 
 -- | Show 'ByteString' structure.
 --
@@ -19,3 +21,9 @@ instance Show (ShowTrace L.ByteString) where
 
 instance Show (ShowTrace ByteString) where
   show (ShowTrace bs@(BS fp len)) = "BS " <> show fp <> " " <> show len <> ":" <> show bs
+
+instance Show (ShowTrace a) => Show (ShowTrace (Maybe a)) where
+  show (ShowTrace x) = show (ShowTrace <$> x)
+
+instance Show (ShowTrace a) => Show (ShowTrace (Tagged t a)) where
+  show (ShowTrace x) = show (ShowTrace <$> x)
