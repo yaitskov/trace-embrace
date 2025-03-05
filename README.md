@@ -187,10 +187,9 @@ mode:
 
 ## <a name="configuration-file"></a> Configuration file
 
-The file has name same as cabal one and YAML format (`yaml` -
-extension).  The file is generanted on build if missing.
+The file is generanted on build if missing.
 
-### Default compile time config file
+### Default compile time config file (trace-embrace.yaml)
 
 ``` yaml
 levels:
