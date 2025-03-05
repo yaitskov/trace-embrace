@@ -3,6 +3,7 @@ module Debug.TraceEmbrace.ByteString where
 import Data.ByteString.Lazy.Internal qualified as L
 import Data.ByteString.Internal (ByteString(..))
 
+
 -- | Show 'ByteString' structure.
 --
 -- >>> showLbsAsIs ("a" <> "b")

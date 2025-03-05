@@ -1,7 +1,7 @@
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 -- | Tracing with TH
-module Debug.TraceEmbrace.TH (tr, tw, trIo, trFunMarker, trIoFunMarker) where
+module Debug.TraceEmbrace.TH (tr, tw, tw', trIo, trFunMarker, trIoFunMarker) where
 
 import Debug.Trace
 import Debug.TraceEmbrace.Config
@@ -43,6 +43,10 @@ tr = I.tr [| \x -> x |]
 -- > Module::foo get; x : 132 => 133
 tw :: String -> Q Exp
 tw = I.tw [| \x -> x |]
+
+-- | Like 'tw' but return value is wrapped with 'ShowTrace'.
+tw' :: String -> Q Exp
+tw' = I.tw' [| \x -> x |]
 
 -- | TH version of 'traceIO' and 'traceEventIO'
 -- The message is formatted according to 'TraceMessageFormat'.

@@ -155,8 +155,9 @@ Besides
 and `/dev/null`,
 [trIo](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:trIo),
 [tr](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tr)
-and
 [tw](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw)
+and
+[tw'](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw')
 functions can forward tracing messages to
 [hPutStrLn](https://hackage.haskell.org/package/base/docs/System-IO.html#v:hPutStrLn)
 or
@@ -280,6 +281,9 @@ A trace line for the snippet above would be:
 
 > Module:fun: 11 get; bs: "abc"; bs: ["ab", "c"]
 
+For tracing returning values wrapped into
+[ShowTrace](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#t:ShowTrace)
+use [tw'](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw').
 
 ### Pattern matching syntax
 

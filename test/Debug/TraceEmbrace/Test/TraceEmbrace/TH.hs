@@ -1,6 +1,8 @@
+{-# LANGUAGE OverloadedStrings #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Debug.TraceEmbrace.Test.TraceEmbrace.TH where
 
+import Data.ByteString.Lazy
 import Debug.TraceEmbrace
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
 import Test.Tasty.HUnit ((@=?))
@@ -38,6 +40,13 @@ unit_tw = withPrefixEnvVar thresholdConfig "" $ go one
   where
     go x = x @=? foo x
     foo x = $(tw "tw foo/x") x
+
+unit_tw' :: IO ()
+unit_tw' = withPrefixEnvVar thresholdConfig "" $ go bs
+  where
+    bs :: ByteString = "x" <> "y"
+    go x = x @=? foo x
+    foo x = $(tw' "tw foo/x") x
 
 unit_trIo :: IO ()
 unit_trIo = withPrefixEnvVar thresholdConfig "" $ go one

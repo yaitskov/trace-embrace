@@ -324,6 +324,17 @@ tw idF rawMsg = do
                         (wrap x))
        |]
 
+tw' :: Q Exp -> String -> Q Exp
+tw' idF rawMsg = do
+  c <- getConfig
+  traceG c idF (go c) rawMsg
+  where
+    go c s fmt =
+      [| \x -> unwrap ($(chooseTraceFunOnTh c s)
+                        ($(traceMessage s fmt svarsWith) (ShowTrace x))
+                        (wrap x))
+       |]
+
 trIo :: Q Exp -> String -> Q Exp
 trIo idF rawMsg = do
   c <- getConfig
