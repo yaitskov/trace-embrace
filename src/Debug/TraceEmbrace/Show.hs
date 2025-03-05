@@ -75,5 +75,5 @@ instance (Show a, Show b, Show c) => Show (# a, b, c #) where
 $(concat <$> sequence [ deriveShowTuple3 ut ut' ut'' | ut <- unTypes, ut' <- unTypes, ut'' <- unTypes ])
 $(concat <$> sequence [ deriveShowSum3 ut ut' ut'' | ut <- unTypes, ut' <- unTypes, ut'' <- unTypes ])
 
-instance P.Show a => Show a where
+instance {-# OVERLAPPABLE #-} P.Show a => Show a where
   show = P.show
