@@ -22,6 +22,7 @@ library
     base < 5,
     bytestring > 0.11 && < 0.12.3,
     containers < 0.9,
+    cpphs < 2.0,
     deepseq < 1.8,
     directory < 2.0,
     lens < 6.0,

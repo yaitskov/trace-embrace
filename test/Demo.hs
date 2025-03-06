@@ -1,12 +1,12 @@
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE CPP #-}
 -- | File combines samples which are important for FileIndex
 -- such us top functions, method instances and default methods
 module Demo where
 
-foo :: Int -> Int
-foo x = y
-  where
-    y = x
+#if !MIN_VERSION_base(4,8,0)
+#endif
+
 
 (***) :: Int -> Int -> Int
 x *** y = x * y
@@ -25,3 +25,8 @@ class MyLen x where
 instance MyLen Int where
   x +++ y = x + y
   mylen = id
+
+foo :: Int -> Int
+foo x = y
+  where
+    y = x

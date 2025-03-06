@@ -24,6 +24,7 @@ import GHC.Types.SrcLoc
 import GHC.Utils.Outputable hiding ((<>))
 import Language.Haskell.Syntax
 import Language.Haskell.TH.Syntax (Q (..), runIO, getQ, putQ, Loc (..), Lift, reportWarning)
+import Language.Preprocessor.Cpphs (runCpphs, defaultCpphsOptions)
 import Unsafe.Coerce
 
 
@@ -47,7 +48,7 @@ getLineFileIndex = getLineFileIndex' . loc_filename
 
 mkLineFunIndex :: FilePath -> Q LineFileIndex
 mkLineFunIndex fp = do
-  fileContent <- runIO (readFile fp)
+  fileContent <- runIO (runCpphs defaultCpphsOptions fp =<< readFile fp)
   ops <- initParserOpts <$> getDynFlags
   case runParser fp ops fileContent parseModule of
     POk _ (L _ r) ->
