@@ -7,7 +7,7 @@ category:        Development
 author:          Daniil Iaitskov <dyaitskov@gmail.com>
 maintainer:      Daniil Iaitskov <dyaitskov@gmail.com>
 stability:       experimental
-synopsis:        Conditional Debug.Trace controlled via environment variable
+synopsis:        Compile and runtime configurable version of Debug.Trace module
 homepage:        https://github.com/yaitskov/trace-embrace
 bug-reports:     https://github.com/yaitskov/trace-embrace/issues
 build-type:      Simple
