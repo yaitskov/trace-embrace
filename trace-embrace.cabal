@@ -1,6 +1,6 @@
 cabal-version:   3.0
 name:            trace-embrace
-version:         1.0.1
+version:         1.0.2
 license:         BSD-3-Clause
 license-file:    LICENSE
 category:        Development
@@ -328,7 +328,8 @@ description:
 
 tested-with:
   GHC == 9.10.1
-
+extra-doc-files:
+  changelog.md
 library
   build-depends:
     aeson < 3.0,
