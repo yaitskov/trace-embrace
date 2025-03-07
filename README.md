@@ -235,6 +235,15 @@ TRACE_EMBRACE_FOO_BAR=- ./foo        # disable tracing
 TRACE_EMBRACE_FOO_BAR=rtc.yaml ./foo # override threshold levels
 ```
 
+The variable name can be specified explicitly:
+
+``` yaml
+runtimeLevelsOverrideEnvVar:
+  tag: EnvironmentVariable
+  varName: "FOO_BAR"
+```
+
+
 ## Examples
 
 ### TH version of traceWith
