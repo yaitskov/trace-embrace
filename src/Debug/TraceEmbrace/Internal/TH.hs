@@ -190,7 +190,7 @@ traceMessage mavs tmf svarsFun =
         let
           m = loc_module lc
           line = fst $ loc_start lc
-        strL <$> MT.lift (fmap snd . IM.lookupLT line <$> getLineFileIndex lc >>= \case
+        strL <$> MT.lift (fmap snd . IM.lookupLE line <$> getLineFileIndex lc >>= \case
           Nothing -> do
             reportWarning (printf "No function name for line [%d] in module [%s]" line m)
             pure "N/A"
