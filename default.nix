@@ -22,6 +22,7 @@ let
     "^src.*$"
     "^test.*$"
     "^LICENSE.*$"
+    "^changelog.md$"
     "^.*\\.cabal$"
   ];
 
