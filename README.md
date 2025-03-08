@@ -312,7 +312,7 @@ fun _ = 0
 
 A trace line for the snippet above would be:
 
-> Module:fun:  7 get; v: Just 1; x: 1
+> Module:fun:  7 get; v: 1; x: 1
 
 ### Unlifted vars
 
