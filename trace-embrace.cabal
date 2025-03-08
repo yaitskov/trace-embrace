@@ -165,7 +165,7 @@ description:
     <https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tr tr>
     <https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw tw>
     and
-    <https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw%27 tw\'>
+    <https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw-39- tw\'>
     functions can forward tracing messages to
     <https://hackage.haskell.org/package/base/docs/System-IO.html#v:hPutStrLn hPutStrLn>
     or
@@ -288,7 +288,7 @@ description:
     For tracing returning values wrapped into
     <https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#t:ShowTrace ShowTrace>
     use
-    <https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw%27 tw\'>.
+    <https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw-39- tw\'>.
     
     === Pattern matching syntax
     #pattern-matching-syntax#
@@ -307,7 +307,7 @@ description:
     
     A trace line for the snippet above would be:
     
-    Module:fun: 7 get; v: Just 1; x: 1
+    Module:fun: 7 get; v: 1; x: 1
     
     === Unlifted vars
     #unlifted-vars#
