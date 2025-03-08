@@ -1,22 +1,18 @@
 {
-  "nixpkgs": {
-    "branch": "master",
-    "owner": "NixOS",
-    "repo": "nixpkgs",
-    "rev": "e7a98efedcc1d0a2a8455580c562b20718c36444",
-    "sha256": "sha256:0pcvllrvnbr2s1sfc8gizz864b1wwz9mac3ri3fmkrxvajwlmmdd",
-    "type": "tarball",
-    "url": "https://github.com/NixOS/nixpkgs/archive/e7a98efedcc1d0a2a8455580c562b20718c36444.tar.gz",
-    "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-  },
-  "upload-doc-to-hackage": {
-    "branch": "master",
-    "owner": "yaitskov",
-    "repo": "upload-doc-to-hackage",
-    "rev": "a180b14b21610ce39f296ad7b9dcf6dfe9ac69cf",
-    "sha256": "sha256:0pcvllrvnbr2s1sfc8gizz864b1wwz9mac3ri3fmkrxvajwlmmde",
-    "type": "tarball",
-    "url": "https://github.com/yaitskov/upload-doc-to-hackage/archive/a180b14b21610ce39f296ad7b9dcf6dfe9ac69cf.tar.gz",
-    "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
-  }
+    "nixpkgs": {
+        "branch": "master",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e7a98efedcc1d0a2a8455580c562b20718c36444",
+        "sha256": "sha256:0pcvllrvnbr2s1sfc8gizz864b1wwz9mac3ri3fmkrxvajwlmmdd",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/e7a98efedcc1d0a2a8455580c562b20718c36444.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "upload-doc-to-hackage": {
+        "sha256": "0r1q21dngyalrm0ad204y470wr3s89mssbw9qi195hpgbp8qs8d2",
+        "type": "tarball",
+        "url": "https://github.com/yaitskov/upload-doc-to-hackage/archive/a180b14b21610ce39f296ad7b9dcf6dfe9ac69cf.tar.gz",
+        "url_template": "https://github.com/yaitskov/upload-doc-to-hackage/archive/a180b14b21610ce39f296ad7b9dcf6dfe9ac69cf.tar.gz"
+    }
 }
