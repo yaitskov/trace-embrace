@@ -157,7 +157,7 @@ and `/dev/null`,
 [tr](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tr)
 [tw](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw)
 and
-[tw\'](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw%27)
+[tw\'](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw-39-)
 functions can forward tracing messages to
 [hPutStrLn](https://hackage.haskell.org/package/base/docs/System-IO.html#v:hPutStrLn)
 or
@@ -292,7 +292,7 @@ A trace line for the snippet above would be:
 
 For tracing returning values wrapped into
 [ShowTrace](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#t:ShowTrace)
-use [tw\'](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw%27).
+use [tw\'](https://hackage.haskell.org/package/trace-embrace/docs/Debug-TraceEmbrace.html#v:tw-39-).
 
 ### Pattern matching syntax
 
