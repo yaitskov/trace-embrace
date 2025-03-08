@@ -126,16 +126,17 @@ yaml2Config yc =
   (unrefine $ yc.runtimeLevelsOverrideEnvVar)
 
 getConfig :: Q TraceEmbraceConfig
-getConfig = go
+getConfig = do
+  c <- runIO (readIORef traceEmbraceConfigRef) >>= loadIfNothing
+  addDependentFile traceEmbraceConfigFileName
+  pure c
   where
-    go = runIO (readIORef traceEmbraceConfigRef) >>= \case
+    loadIfNothing = \case
       Nothing -> do
         c <- yaml2Config <$> runIO loadYamlConfig
         runIO (atomicWriteIORef traceEmbraceConfigRef (Just c))
-        addDependentFile traceEmbraceConfigFileName
         pure c
       Just c -> pure c
-
 
 traceAll :: [LeveledModulePrefix]
 traceAll = emptyPrefixTraceLevel Trace
