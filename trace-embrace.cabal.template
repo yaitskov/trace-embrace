@@ -1,13 +1,13 @@
 cabal-version:   3.0
 name:            trace-embrace
-version:         1.0.2
+version:         1.0.3
 license:         BSD-3-Clause
 license-file:    LICENSE
 category:        Development
 author:          Daniil Iaitskov <dyaitskov@gmail.com>
 maintainer:      Daniil Iaitskov <dyaitskov@gmail.com>
 stability:       experimental
-synopsis:        Compile and runtime configurable version of Debug.Trace module
+synopsis:        Smart version of Debug.Trace module
 homepage:        https://github.com/yaitskov/trace-embrace
 bug-reports:     https://github.com/yaitskov/trace-embrace/issues
 build-type:      Simple
