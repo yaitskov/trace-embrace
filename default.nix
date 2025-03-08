@@ -13,6 +13,7 @@ let
 
   inherit (pkgs) lib;
 
+  # haUp = pkgs.callPackage /home/dan/pro/script/upload-doc-to-hackage {};
   hsPkgSetOverlay = pkgs.callPackage ./nix/haskell/overlay.nix {
     inherit (nix) sources;
   };
@@ -45,7 +46,9 @@ let
       hlint
       niv
       pandoc
-    ]) ++ [ hls ];
+      which
+      git
+    ]) ++ [ hls hsPkgs.upload-doc-to-hackage ];
     shellHook = ''
       export PS1='$ '
       echo $(dirname $(dirname $(which ghc)))/share/doc > .haddock-ref

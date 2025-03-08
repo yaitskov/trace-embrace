@@ -4,5 +4,11 @@
         "repo": "/home/dan/pro/nixpkgs",
         "rev": "e7a98efedcc1d0a2a8455580c562b20718c36444",
         "type": "git"
+    },
+    "upload-doc-to-hackage": {
+        "branch": "master",
+        "repo": "/home/dan/pro/script/upload-doc-to-hackage",
+        "rev": "345639ca7e491a84a06538fc7b2bf6fedf0c0681",
+        "type": "git"
     }
 }
