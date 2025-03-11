@@ -14,6 +14,13 @@ unit_tr_trace = withPrefixEnvVar thresholdConfig "" $ go one
       where
         foo = $(tr "-foo trace/x")
 
+unit_tr_twice_on_same_line :: IO ()
+unit_tr_twice_on_same_line = withPrefixEnvVar thresholdConfig "" $ go one
+  where
+    go x = x @=? foo x
+      where
+        foo = $(tr "-foo trace/x") . $(tr "-foo trace/x")
+
 unit_tr_info :: IO ()
 unit_tr_info = withPrefixEnvVar thresholdConfig "" $ go one
   where

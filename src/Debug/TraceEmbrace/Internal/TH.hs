@@ -209,8 +209,10 @@ shortenModPath prevDot
       [] -> []
 
 flagVarName :: Q Name
-flagVarName =
-  newName =<< ("_trace_if_flag_on_line_" <>) . show . fst . loc_start <$> location
+flagVarName = do
+  l <- location
+  let (line, col) = loc_start l
+  newName $ "_trace_if_flag_on_line_" <> show line <> "_on_col_"  <> show col
 
 getModTraceFlagVar :: Q Name
 getModTraceFlagVar = do
