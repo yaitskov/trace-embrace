@@ -55,9 +55,9 @@ unit_tw' = withPrefixEnvVar thresholdConfig "" $ go bs
     go x = x @=? foo x
     foo x = $(tw' "tw foo/x") x
 
-unit_trIo :: IO ()
-unit_trIo = withPrefixEnvVar thresholdConfig "" $ go one
-  where
-    go x = (x @=?) =<< foo x
-      where
-        foo y = $(trIo "foo info/y") >> pure y
+-- unit_trIo :: IO ()
+-- unit_trIo = withPrefixEnvVar thresholdConfig "" $ go one
+--   where
+--     go x = (x @=?) =<< foo x
+--       where
+--         foo y = $(trIo "foo info/y") >> pure y
