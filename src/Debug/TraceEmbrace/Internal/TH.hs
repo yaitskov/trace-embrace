@@ -337,18 +337,21 @@ tw' idF rawMsg = do
                         (wrap x))
        |]
 
+chooseTraceIoFunOnTh :: Show s => TraceEmbraceConfig -> s -> Q Exp
+chooseTraceIoFunOnTh c s =
+  case c ^. #mode of
+    TraceDisabled -> fail $ "Dead code on" <> show s
+    TraceStd -> pure $ VarE 'T.traceIO
+    TraceUnsafeIo snk -> [| hPutStrLn (getSinkHandle snk) |]
+    TraceEvent -> pure $ VarE 'T.traceEventIO
+
 trIo :: Q Exp -> String -> Q Exp
 trIo idF rawMsg = do
   c <- getConfig
   traceG c idF (go c) rawMsg
   where
-    go c s fmt = do
-      let trFun = case c ^. #mode of
-                    TraceDisabled -> error $ "Dead code on" <> show s
-                    TraceStd -> 'T.traceIO
-                    TraceUnsafeIo _ -> 'safePutStrLn
-                    TraceEvent -> 'T.traceEventIO
-      [| $(varE trFun) $(traceMessage s fmt svars) |]
+    go c s fmt =
+      [| $(chooseTraceIoFunOnTh c s) $(traceMessage s fmt svars) |]
 
 trFunMarker :: Q Exp -> Q Exp
 trFunMarker idF = do
