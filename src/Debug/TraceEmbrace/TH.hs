@@ -5,15 +5,12 @@ module Debug.TraceEmbrace.TH (tr, tw, tw', trIo, trFunMarker, trIoFunMarker) whe
 
 import Debug.Trace
 import Debug.TraceEmbrace.Config
-import Debug.TraceEmbrace.Haddock
 import Debug.TraceEmbrace.Internal.Rewrap
 import Debug.TraceEmbrace.Internal.TH qualified as I
+import Haddock.UseRefs
 import Language.Haskell.TH
 
-data Ref
-
-instance HaddockRefs Ref where
-  usedSomeHow _ = length ['TraceMessageFormat, ''Rewrap, 'trace, 'traceEvent]
+countDocRefs
 
 -- | TH version of 'trace' and 'traceEvent'
 -- The message is formatted according to 'TraceMessageFormat'.

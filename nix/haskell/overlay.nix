@@ -14,4 +14,10 @@ in hfinal: hprev:
 (listToAttrs (map (a:
   nameValuePair a.name
     (dontCheck (hfinal.callCabal2nix a.name a.source { }))) [
-    ])) // {"upload-doc-to-hackage" = hfinal.callPackage sources.upload-doc-to-hackage {};}
+    ])) // {"upload-doc-to-hackage" = hfinal.callPackage sources.upload-doc-to-hackage {};
+            "haddock-use-refs" = hfinal.callHackageDirect
+              { pkg = "haddock-use-refs";
+                ver = "1.0.1";
+                sha256 = "sha256-fxrfMQ4CUthzNwYVjwV5kJmmPgimVpbnVhxnoYi1GrE=";
+              } {};
+           }
