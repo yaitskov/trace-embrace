@@ -131,18 +131,22 @@ configReadToken = unsafePerformIO (newMVar ())
 
 getConfig :: Q TraceEmbraceConfig
 getConfig = do
-  c <- runIO (readIORef traceEmbraceConfigRef) >>= loadIfNothing
+  c <- runIO readConfigRef >>= loadIfNothing
   addDependentFile traceEmbraceConfigFileName
   pure c
   where
+    readConfigRef = readIORef traceEmbraceConfigRef
     loadIfNothing = \case
       Nothing -> runIO $ do
         bracket (takeMVar configReadToken)
           (putMVar configReadToken)
-          (\() -> do
-              c <- yaml2Config <$> loadYamlConfig
-              (atomicWriteIORef traceEmbraceConfigRef (Just c))
-              pure c)
+          (\() ->
+             readConfigRef >>= \case
+               Just c -> pure c
+               Nothing -> do
+                 c <- yaml2Config <$> loadYamlConfig
+                 (atomicWriteIORef traceEmbraceConfigRef (Just c))
+                 pure c)
       Just c -> pure c
 
 traceAll :: [LeveledModulePrefix]
