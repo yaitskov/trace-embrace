@@ -82,10 +82,15 @@ defaultYamlConfig = newYamlConfig { version = Nothing }
 loadYamlConfig :: IO YamlConfig
 loadYamlConfig = do
   doesFileExist fp >>= \case
-    True -> configFromJust . (<> defaultYamlConfig) =<< catch (Y.decodeFileThrow fp) badYaml
+    True -> do
+      putStrLn $ "Loading existish trace-embrace config from [" <> fp <> "]"
+      configFromJust . (<> defaultYamlConfig) =<< catch (Y.decodeFileThrow fp) badYaml
     False -> do
-      Y.encodeFile fp newYamlConfig
-      traceIO $ "New default config trace-embrace file is generated: [" <> fp <> "]"
+      catch (do
+                Y.encodeFile fp newYamlConfig
+                putStrLn $ "New default config trace-embrace file is generated: [" <> fp <> "]")
+            (\e -> putStrLn $ "Failed to create config file [" <> fp <> "] due: " <>
+              prettyPrintParseException e)
       configFromJust newYamlConfig
   where
     configFromJust :: YamlConfigMaybe -> IO YamlConfig
@@ -142,7 +147,9 @@ getConfig = do
           (putMVar configReadToken)
           (\() ->
              readConfigRef >>= \case
-               Just c -> pure c
+               Just c -> do
+                 putStrLn "trace-embrace.yaml Config is already loaded after resume"
+                 pure c
                Nothing -> do
                  c <- yaml2Config <$> loadYamlConfig
                  (atomicWriteIORef traceEmbraceConfigRef (Just c))
