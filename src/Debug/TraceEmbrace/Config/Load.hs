@@ -82,8 +82,7 @@ defaultYamlConfig = newYamlConfig { version = Nothing }
 loadYamlConfig :: IO YamlConfig
 loadYamlConfig = do
   doesFileExist fp >>= \case
-    True -> do
-      putStrLn $ "Loading existish trace-embrace config from [" <> fp <> "]"
+    True ->
       configFromJust . (<> defaultYamlConfig) =<< catch (Y.decodeFileThrow fp) badYaml
     False -> do
       catch (do
@@ -147,8 +146,7 @@ getConfig = do
           (putMVar configReadToken)
           (\() ->
              readConfigRef >>= \case
-               Just c -> do
-                 putStrLn "trace-embrace.yaml Config is already loaded after resume"
+               Just c ->
                  pure c
                Nothing -> do
                  c <- yaml2Config <$> loadYamlConfig
