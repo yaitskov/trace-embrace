@@ -5,8 +5,11 @@ import Control.Lens
 import Debug.TraceEmbrace.Config.Type
 import Debug.TraceEmbrace.Internal.TH
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
+import Language.Haskell.TH.Lock
 import Test.Tasty.HUnit ((@=?))
 import System.Directory
+
+ensureSerialCompilationVerbose
 
 unit_unsafeio_stderr_mode :: IO ()
 unit_unsafeio_stderr_mode =

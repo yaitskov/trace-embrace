@@ -20,4 +20,9 @@ in hfinal: hprev:
                 ver = "1.0.1";
                 sha256 = "sha256-fxrfMQ4CUthzNwYVjwV5kJmmPgimVpbnVhxnoYi1GrE=";
               } {};
+            "th-lock" = hfinal.callHackageDirect
+              { pkg = "th-lock";
+                ver = "0.0.4";
+                sha256 = "sha256-chFv77J0oWLzf4zAX4Awv7uhQEhiPegvPgrLWNaEuhs=";
+              } {};
            }

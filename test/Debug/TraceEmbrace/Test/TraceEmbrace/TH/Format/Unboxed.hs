@@ -9,7 +9,11 @@ import Data.Generics.Labels ()
 import Debug.TraceEmbrace
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
 import GHC.Exts
+import Language.Haskell.TH.Lock
 import Test.Tasty.HUnit ((@=?))
+
+
+ensureSerialCompilationVerbose
 
 unit_unboxed_int :: IO ()
 unit_unboxed_int = "foo; x#: 1#" @=? foo one

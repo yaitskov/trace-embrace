@@ -1,11 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 -- {-# OPTIONS_GHC -ddump-splices #-}
 module Debug.TraceEmbrace.Test.TraceEmbrace.TH where
 
 import Data.ByteString.Lazy
 import Debug.TraceEmbrace
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
+import Language.Haskell.TH.Lock
+import Language.Haskell.TH.Syntax
 import Test.Tasty.HUnit ((@=?))
+
+ensureSerialCompilationVerbose
 
 unit_tr_trace :: IO ()
 unit_tr_trace = withPrefixEnvVar thresholdConfig "" $ go one
@@ -62,9 +67,6 @@ unit_trIo = withPrefixEnvVar thresholdConfig "" $ go one
       where
         foo y = $(trIo "foo info/y") >> pure y
 
-unit_trIo_ :: IO ()
-unit_trIo_ = withPrefixEnvVar thresholdConfig "" $ go one
-  where
-    go x = (x @=?) =<< foo x
-      where
-        foo y = $(trIo "foo info/y") >> pure y
+unit_ensure_mode_trace_std :: IO ()
+unit_ensure_mode_trace_std =
+  $( lift =<< ((.mode) <$> getConfig)  ) @=? TraceStd

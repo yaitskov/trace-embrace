@@ -5,10 +5,14 @@ module Debug.TraceEmbrace.Test.TraceEmbrace.TH.Format.Lifted where
 import Data.ByteString.Lazy
 import Debug.TraceEmbrace.Internal.TH
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
+import Language.Haskell.TH.Lock
 import Test.Tasty.HUnit ((@=?))
 
 -- not working: https://gitlab.haskell.org/ghc/ghc/-/issues/25775
 default (Int)
+
+
+ensureSerialCompilationVerbose
 
 unit_traceMessage_const :: IO ()
 unit_traceMessage_const =

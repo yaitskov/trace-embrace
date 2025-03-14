@@ -442,6 +442,7 @@ test-suite test
     , template-haskell
     , temporary < 1.5
     , text
+    , th-lock < 1.0.0
     , trace-embrace
     , yaml
   default-language: Haskell2010

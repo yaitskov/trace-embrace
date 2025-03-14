@@ -23,7 +23,7 @@ data SinkMode
   | TraceStd
   | TraceUnsafeIo { sink :: IoSink }
   | TraceEvent
-  deriving (Eq, Show, Generic)
+  deriving (Eq, Show, Generic, Lift)
 
 instance ToJSON SinkMode where
   toEncoding = genericToEncoding defaultOptions

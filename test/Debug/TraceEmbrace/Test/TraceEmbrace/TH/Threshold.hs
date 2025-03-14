@@ -7,10 +7,12 @@ import Data.Yaml qualified as Y
 import Debug.TraceEmbrace.Internal.TH qualified as I
 import Debug.TraceEmbrace.Config
 import Debug.TraceEmbrace.Test.TraceEmbrace.Config
+import Language.Haskell.TH.Lock
 import System.FilePath
 import System.IO.Temp
 import Test.Tasty.HUnit ((@=?))
 
+ensureSerialCompilationVerbose
 
 unit_mode_disabled :: IO ()
 unit_mode_disabled =
