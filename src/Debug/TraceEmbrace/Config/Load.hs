@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Debug.TraceEmbrace.Config.Load where
 
-import Control.Concurrent.MVar
+import Control.Concurrent
 import Control.Exception
 import Data.Cache.LRU as LRU
 import Data.Char
@@ -136,7 +136,9 @@ configReadToken = unsafePerformIO (newMVar ())
 getConfig :: Q TraceEmbraceConfig
 getConfig = do
   c <- runIO readConfigRef >>= loadIfNothing
+  runIO $ takeMVar configReadToken
   addDependentFile traceEmbraceConfigFileName
+  runIO $ putMVar configReadToken ()
   pure c
   where
     readConfigRef = readIORef traceEmbraceConfigRef
