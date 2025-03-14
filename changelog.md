@@ -1,7 +1,8 @@
 # trace-embrace changelog
 
-## Version 1.0.7 2025-03-14
+## Version 1.0.8 2025-03-14
   * bugfix: serialize test compilation with [th-lock](https://hackage.haskell.org/package/th-lock)
+  * bugfix: serialize yaml config loading and on demand initialization
 
 ## Version 1.0.4 2025-03-11
   * bugfix: multiple traces on the same line

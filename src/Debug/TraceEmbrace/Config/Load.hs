@@ -125,6 +125,10 @@ yaml2Config yc =
   (mkPrefixTree . unrefine $ yc.levels)
   (unrefine $ yc.runtimeLevelsOverrideEnvVar)
 
+configReadToken :: MVar ()
+configReadToken = unsafePerformIO (newMVar ())
+{-# NOINLINE configReadToken #-}
+
 getConfig :: Q TraceEmbraceConfig
 getConfig = do
   c <- runIO (readIORef traceEmbraceConfigRef) >>= loadIfNothing
@@ -132,10 +136,13 @@ getConfig = do
   pure c
   where
     loadIfNothing = \case
-      Nothing -> do
-        c <- yaml2Config <$> runIO loadYamlConfig
-        runIO (atomicWriteIORef traceEmbraceConfigRef (Just c))
-        pure c
+      Nothing -> runIO $ do
+        bracket (takeMVar configReadToken)
+          (putMVar configReadToken)
+          (\() -> do
+              c <- yaml2Config <$> loadYamlConfig
+              (atomicWriteIORef traceEmbraceConfigRef (Just c))
+              pure c)
       Just c -> pure c
 
 traceAll :: [LeveledModulePrefix]
