@@ -64,3 +64,5 @@ unit_ret_unboxed_unit = "foo; t: (# #)" @=? foo (#  #)
   where
     foo :: (# #) -> String
     foo t = $(trConstMsg "foo/t")
+
+resetConfig

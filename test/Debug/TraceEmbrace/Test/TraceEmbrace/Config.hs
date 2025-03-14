@@ -17,6 +17,7 @@ import System.Environment
 import System.IO
 import System.IO.Temp
 
+
 positionOnly :: TraceMessageFormat
 positionOnly =
   defaultTraceMessageFormat
@@ -65,10 +66,19 @@ thresholdConfig = v & #levels .~ mkPrefixTree (emptyPrefixTraceLevel Info)
          Right r -> r
          Left e -> error e
 
+-- | Always call 'resetConfig' at the end of module using 'setConfig'.
 setConfig :: TraceEmbraceConfig -> Q ()
 setConfig c =
   runIO (do closeUnsafeIoSink
             atomicWriteIORef traceEmbraceConfigRef (Just c))
+
+-- | Every module using 'setConfig' should call at the end
+-- 'resetConfig' because setConfig does not create real file.
+resetConfig :: Q [Dec]
+resetConfig = do
+  runIO (do closeUnsafeIoSink
+            atomicWriteIORef traceEmbraceConfigRef Nothing)
+  pure []
 
 closeUnsafeIoSink :: IO ()
 closeUnsafeIoSink = do

@@ -60,3 +60,5 @@ unit_fun_marker =  withPrefixEnvVar thresholdConfig "" $ go one
     go x = x @=? foo x
       where
         foo = $(trFunMarker poisonedId)
+
+resetConfig

@@ -64,3 +64,5 @@ unit_mode_enabled_with_evar_set_empty = do
   withPrefixEnvVar thresholdConfig "-" $ do
     two @=? $(setConfig (thresholdConfig & #mode .~ TraceStd)
               >> I.tr [| \x -> x + 1 |] "tm") one
+
+resetConfig

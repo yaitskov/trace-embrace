@@ -136,9 +136,9 @@ configReadToken = unsafePerformIO (newMVar ())
 getConfig :: Q TraceEmbraceConfig
 getConfig = do
   c <- runIO readConfigRef >>= loadIfNothing
-  runIO $ takeMVar configReadToken
-  addDependentFile traceEmbraceConfigFileName
-  runIO $ putMVar configReadToken ()
+  runIO (doesFileExist traceEmbraceConfigFileName) >>= \case
+    True -> addDependentFile traceEmbraceConfigFileName
+    False -> reportWarning $ "Config File is missing - skip dependency"
   pure c
   where
     readConfigRef = readIORef traceEmbraceConfigRef
