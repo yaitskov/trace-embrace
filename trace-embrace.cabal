@@ -398,6 +398,7 @@ test-suite test
     Debug.TraceEmbrace.Test.TraceEmbrace.Config
     Debug.TraceEmbrace.Test.TraceEmbrace.DemoIndex
     Debug.TraceEmbrace.Test.TraceEmbrace.FileIndex
+    Debug.TraceEmbrace.Test.TraceEmbrace.GuardedFunction
     Debug.TraceEmbrace.Test.TraceEmbrace.TH
     Debug.TraceEmbrace.Test.TraceEmbrace.TH.Event
     Debug.TraceEmbrace.Test.TraceEmbrace.TH.Format.Lifted

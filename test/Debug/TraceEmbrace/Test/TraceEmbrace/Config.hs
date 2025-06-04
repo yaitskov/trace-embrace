@@ -47,10 +47,10 @@ msgAndVarsOnly =
   }
 
 trConstMsg :: String -> Q Exp
-trConstMsg msgAndVars = traceMessage (TrMsgAndVars msgAndVars) msgAndVarsOnly svars
+trConstMsg msgAndVars = traceMessage (TrMsgAndVars [] msgAndVars) msgAndVarsOnly svars
 
 trFunMsg :: String -> Q Exp
-trFunMsg msgAndVars = traceMessage (TrMsgAndVars msgAndVars) msgAndVarsOnly svarsWith
+trFunMsg msgAndVars = traceMessage (TrMsgAndVars [] msgAndVars) msgAndVarsOnly svarsWith
 
 one :: Int
 one = 1

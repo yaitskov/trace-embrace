@@ -13,7 +13,7 @@ default (Int)
 unit_traceMessage_const :: IO ()
 unit_traceMessage_const =
   ("Debug.TraceEmbrace.Test.TraceEmbrace.TH.Format.Lifted::unit_traceMessage_const" :: String) @=?
-     $(traceMessage (TrMsgAndVars "skipped") positionOnly svars)
+     $(traceMessage (TrMsgAndVars [] "skipped") positionOnly svars)
 
 unit_traceMessage_fun :: IO ()
 unit_traceMessage_fun = ("foo => True" :: String) @=?  $(trFunMsg "foo") True

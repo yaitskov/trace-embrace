@@ -1,10 +1,8 @@
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 -- | Tracing with TH
-module Debug.TraceEmbrace.TH (tr, tw, tw', trIo, u, a, s_, tg, tg', trFunMarker, trIoFunMarker) where
+module Debug.TraceEmbrace.TH (tr, tw, tw', trIo, u, a, s_, tg, tg', underbar, trFunMarker, trIoFunMarker) where
 
-import Data.Char (chr, ord)
-import Data.List (intercalate)
 import Debug.Trace
 import Debug.TraceEmbrace.Config
 import Debug.TraceEmbrace.FileIndex (FunName (..))
@@ -28,8 +26,7 @@ countDocRefs
 --
 -- > Module::foo get; x : 132
 tr :: String -> Q Exp
-tr = I.tr [| \x -> x |]
-
+tr tm = I.tr [| \x -> x |] tm
 
 -- | TH version of 'traceWith' and 'traceEventWith'
 -- The message is formatted according to 'TraceMessageFormat'.
@@ -74,10 +71,16 @@ trIoFunMarker = I.trIoFunMarker [| pure () |]
 data ArgPatCounter
   = ArgPatCounter
     { funName :: FunName
-    , lastMatchedArgIdx :: !Int
-    , argNames :: [String]
+    , argNames :: [Name]
     } deriving (Show)
 
+data Undebar = Undebar
+
+instance Show Undebar where
+  show _ = "_"
+
+underbar :: Undebar
+underbar = Undebar
 -- | Generates consequent pattern variable for tracing arguments of a guarded function.
 -- It is assumed that 'a' is used together with 'tg' and 'u'.
 --
@@ -90,14 +93,15 @@ a = do
   cfn <- I.currentFunName
   getQ >>= \case
     Nothing -> reset cfn
-    Just (ArgPatCounter fn argIdx aNames)
-      | fn == cfn -> go aNames cfn $ argIdx + 1
+    Just (ArgPatCounter fn aNames)
+      | fn == cfn -> go aNames cfn
       | otherwise -> reset cfn
   where
-    reset cfn = go [] cfn 0
-    go ans cfn idx =
-      let nn = (:show idx) . chr $ ord 'a' + idx in
-         putQ (ArgPatCounter cfn idx $ nn : ans) >> [p|$(varP =<< newName nn)|]
+    reset cfn = go [] cfn
+    go ans cfn = do
+      nn <- newName $ "traceEmbracePatArg" <> (show $ length ans)
+      putQ (ArgPatCounter cfn $ nn : ans)
+      varP nn
 
 -- | Similar to 'a', but argument is not included in trace message.
 s_ :: Q Pat
@@ -105,12 +109,12 @@ s_ = do
   cfn <- I.currentFunName
   getQ >>= \case
     Nothing -> reset cfn
-    Just (ArgPatCounter fn argIdx aNames)
-      | fn == cfn -> go aNames cfn $ argIdx + 1
+    Just (ArgPatCounter fn aNames)
+      | fn == cfn -> go aNames cfn
       | otherwise -> reset cfn
   where
-    reset cfn = go [] cfn 0
-    go ans cfn idx = putQ (ArgPatCounter cfn idx ans) >> [p|_|]
+    reset cfn = go [] cfn
+    go ans cfn = putQ (ArgPatCounter cfn $ 'underbar : ans) >> [p|_|]
 
 -- | Expands to @$(tr "/a b c d...") False@
 tg :: Q Exp
@@ -122,8 +126,8 @@ tg' msgPrefix = do
   cfn <- I.currentFunName
   getQ >>= \case
     Nothing -> er
-    Just (ArgPatCounter fn _ aNames)
-      | fn == cfn -> [|$(tr $ msgPrefix <> ('/' : (intercalate " " $ reverse aNames))) False|]
+    Just (ArgPatCounter fn aNames)
+      | fn == cfn -> [|$(I.tr' [| \x -> x |] msgPrefix $ reverse aNames) False|]
       | otherwise -> er
   where
     er = fail "Use 'Debug.TraceEmbrace.TH.a' macro to capture function arguments before calling 'tg'"

@@ -25,8 +25,8 @@ import System.IO
 import System.IO.Unsafe (unsafePerformIO)
 import Text.Printf
 
-newtype TrMsgAndVars = TrMsgAndVars String deriving (Eq, P.Show)
-newtype VarsPart = VarsPart String deriving (Eq, P.Show)
+data TrMsgAndVars = TrMsgAndVars [Name] String  deriving (Eq, P.Show)
+data VarsPart = VarsPart [Name] String deriving (Eq, P.Show)
 newtype ModTraceFlagVarName = ModTraceFlagVarName Name deriving (Eq, P.Show)
 
 type SVarsFunM a = StateT (Maybe Name) Q a
@@ -110,17 +110,22 @@ foo x = trace ("get; x: " <> show x <> "; x: " <> show (ShowTrace y)) x
 
 -}
 svars :: SVarsFun
-svars tmf (VarsPart vars) = MT.lift $
+svars tmf (VarsPart patVars vars) = MT.lift $
   case span (';' /=) vars of
     (showVars, ';' : traceVars) ->
-      [| $(listE (wordsToVars 'show showVars
-                   <> wordsToVars 'showTrace traceVars)) :: [String] |]
+      [| $(listE (noTraceVars showVars <> wordsToVars 'showTrace traceVars)) :: [String] |]
     (showVars, "") ->
-      [| $(listE (wordsToVars 'show showVars)) :: [String] |]
+      [| $(listE (noTraceVars showVars)) :: [String] |]
     (sv, st) -> do
       reportError $ printf "No case for %s %s" sv st
       [| [] |]
   where
+    noTraceVars showVars =
+      wordsToVars 'show showVars <> (zipWith (name2Var 'show) [0::Int ..] patVars)
+
+    name2Var f 0 vn = [| $(varE f) $(varE vn) |]
+    name2Var f _ vn = [| " " <> $(varE f) $(varE vn) |]
+
     wordsToVars f vss = fmap go (varNamesFromPat vss)
       where
         go vs =
@@ -136,14 +141,14 @@ svars tmf (VarsPart vars) = MT.lift $
                |]
 
 splitMessageFromVars :: TrMsgAndVars -> (String, VarsPart)
-splitMessageFromVars (TrMsgAndVars trMsg) =
+splitMessageFromVars (TrMsgAndVars patVars trMsg) =
   case span ('/' /=) trMsg of
-    (msgPart, '/':varPart) -> (msgPart, VarsPart varPart)
-    (msgPart, []) -> (msgPart, VarsPart [])
+    (msgPart, '/':varPart) -> (msgPart, VarsPart patVars varPart)
+    (msgPart, []) -> (msgPart, VarsPart patVars [])
     e ->  error $ "No case for:" <> show e
 
-traceMessageLevel :: String -> (TraceLevel, TrMsgAndVars)
-traceMessageLevel = fmap TrMsgAndVars . charToLevel
+traceMessageLevel :: [Name] -> String -> (TraceLevel, TrMsgAndVars)
+traceMessageLevel patVars = fmap (TrMsgAndVars patVars) . charToLevel
 
 -- | Suffix 'svars' with return value.
 svarsWith :: SVarsFun
@@ -249,8 +254,13 @@ readTraceFlag modName trLvl evar fv = do
           atomicWriteIORef fv (Just False) >> pure False
 {-# INLINE readTraceFlag #-}
 
-traceG :: TraceEmbraceConfig -> Q Exp -> (TrMsgAndVars -> TraceMessageFormat -> Q Exp) -> String -> Q Exp
-traceG c idF genTraceLine s =
+traceG :: TraceEmbraceConfig ->
+  Q Exp ->
+  (TrMsgAndVars -> TraceMessageFormat -> Q Exp) ->
+  String ->
+  [Name] ->
+  Q Exp
+traceG c idF genTraceLine s patVars =
   case c ^. #mode of
     TraceDisabled -> idF
     TraceStd -> go
@@ -258,7 +268,7 @@ traceG c idF genTraceLine s =
     TraceEvent -> go
   where
     go =
-      case traceMessageLevel s of
+      case traceMessageLevel patVars s of
         (TracingDisabled, _) -> idF
         (tl, s') -> do
           loc <- location
@@ -312,9 +322,12 @@ chooseTraceFunOnTh c s =
     TraceEvent -> pure $ VarE 'T.traceEvent
 
 tr :: Q Exp -> String -> Q Exp
-tr idF rawMsg = do
+tr idF rawMsg = tr' idF rawMsg []
+
+tr' :: Q Exp -> String -> [Name]-> Q Exp
+tr' idF rawMsg patVars = do
   c <- getConfig
-  traceG c idF (go c) rawMsg
+  traceG c idF (go c) rawMsg patVars
   where
     go c s fmt =
       [| \x -> unwrap ($(chooseTraceFunOnTh c s) $(traceMessage s fmt svars) (wrap x)) |]
@@ -322,7 +335,7 @@ tr idF rawMsg = do
 tw :: Q Exp -> String -> Q Exp
 tw idF rawMsg = do
   c <- getConfig
-  traceG c idF (go c) rawMsg
+  traceG c idF (go c) rawMsg []
   where
     go c s fmt =
       [| \x -> unwrap ($(chooseTraceFunOnTh c s)
@@ -333,7 +346,7 @@ tw idF rawMsg = do
 tw' :: Q Exp -> String -> Q Exp
 tw' idF rawMsg = do
   c <- getConfig
-  traceG c idF (go c) rawMsg
+  traceG c idF (go c) rawMsg []
   where
     go c s fmt =
       [| \x -> unwrap ($(chooseTraceFunOnTh c s)
@@ -352,7 +365,7 @@ chooseTraceIoFunOnTh c s =
 trIo :: Q Exp -> String -> Q Exp
 trIo idF rawMsg = do
   c <- getConfig
-  traceG c idF (go c) rawMsg
+  traceG c idF (go c) rawMsg []
   where
     go c s fmt =
       [| $(chooseTraceIoFunOnTh c s) $(traceMessage s fmt svars) |]
@@ -361,7 +374,7 @@ trFunMarker :: Q Exp -> Q Exp
 trFunMarker idF = do
   c <- getConfig
   let finalC = if c ^. #mode == TraceDisabled then c else markerConfig
-  traceG finalC idF go "/"
+  traceG finalC idF go "/" []
   where
     go s fmt =
       [| \x -> unwrap (T.traceMarker $(traceMessage s fmt svars) (wrap x)) |]
@@ -370,7 +383,7 @@ trIoFunMarker :: Q Exp -> Q Exp
 trIoFunMarker idF = do
   c <- getConfig
   let finalC = if c ^. #mode == TraceDisabled then c else markerConfig
-  traceG finalC idF go "/"
+  traceG finalC idF go "/" []
   where
     go s fmt =
       [| T.traceMarkerIO $(traceMessage s fmt svars) |]

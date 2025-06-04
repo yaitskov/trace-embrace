@@ -8,4 +8,4 @@ import Test.Tasty.HUnit ((@=?))
 
 unit_traceMessage_line :: IO ()
 unit_traceMessage_line =
-  ("11:" :: String) @=? $(traceMessage (TrMsgAndVars "skipped") lineOnly svars)
+  ("11:" :: String) @=? $(traceMessage (TrMsgAndVars [] "skipped") lineOnly svars)
