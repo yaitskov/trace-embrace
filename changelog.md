@@ -1,5 +1,8 @@
 # trace-embrace changelog
 
+## Version 1.1.0 2025-06-04
+  * add `a`, `u` and `tg` for tracing guarded functions
+
 ## Version 1.0.8 2025-03-14
   * bugfix: serialize test compilation with [th-lock](https://hackage.haskell.org/package/th-lock)
   * bugfix: serialize yaml config loading and on demand initialization
