@@ -28,7 +28,7 @@ import Language.Preprocessor.Cpphs (runCpphs, defaultCpphsOptions)
 import Unsafe.Coerce
 
 
-newtype FunName = FunName String deriving (Show, Eq, Ord, IsString, Lift)
+newtype FunName = FunName { unFunName :: String } deriving (Show, Eq, Ord, IsString, Lift)
 type LineFileIndex = IM.IntMap FunName
 
 unsafeRunTcM :: TcM a -> Q a

@@ -160,6 +160,19 @@ concat2 :: Monoid m => [[m]] -> m
 concat2 = mconcat . mconcat
 {-# INLINE concat2 #-}
 
+currentFunName :: Q FunName
+currentFunName = do
+  lc <- location
+  let
+    m = loc_module lc
+    line = fst $ loc_start lc
+  fmap snd . IM.lookupLE line <$> getLineFileIndex lc >>= \case
+    Nothing -> do
+      reportWarning (printf "No function name for line [%d] in module [%s]" line m)
+      pure $ FunName "N/A"
+    Just fn -> pure fn
+  where
+
 -- | Format whole trace message
 traceMessage :: TrMsgAndVars -> TraceMessageFormat -> SVarsFun -> Q Exp
 traceMessage mavs tmf svarsFun =
@@ -185,16 +198,7 @@ traceMessage mavs tmf svarsFun =
         (eludom, htap) <- span (/= '.') . reverse . loc_module <$> loc
         pStrL $ shortenModPath True (reverse htap) <> (reverse eludom)
       PackageName -> strL . loc_package <$> loc
-      FunctionName -> do
-        lc <- loc
-        let
-          m = loc_module lc
-          line = fst $ loc_start lc
-        strL <$> MT.lift (fmap snd . IM.lookupLE line <$> getLineFileIndex lc >>= \case
-          Nothing -> do
-            reportWarning (printf "No function name for line [%d] in module [%s]" line m)
-            pure "N/A"
-          Just (FunName fn) -> pure fn)
+      FunctionName -> strL <$> MT.lift (unFunName <$> currentFunName)
       LineNumber -> strL . P.show . fst . loc_start <$> loc
       Delimiter del -> pStrL del
 
