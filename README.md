@@ -262,6 +262,23 @@ A trace line for the snippet above would be:
 
 > Module:fun:  7 get; x: 1; y: 2; z: 3 => 6
 
+### Guarded function
+
+```haskell
+{-# LANGUAGE TemplateHaskell #-}
+module Module where
+
+import Debug.TraceEmbrace
+
+fun :: Int -> Int -> Int -> Int
+fun $a $a_ $a | $tg = $u
+fun a b c = a + b + c
+```
+
+A trace line for the snippet above would be:
+
+> Module:fun:  7; 1 _ 3
+
 ### Trace lazy ByteString structure
 
 [ByteString](https://hackage.haskell.org/package/bytestring/docs/Data-ByteString-Lazy.html#t:ByteString)
