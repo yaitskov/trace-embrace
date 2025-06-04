@@ -121,9 +121,9 @@ svars tmf (VarsPart patVars vars) = MT.lift $
       [| [] |]
   where
     noTraceVars showVars =
-      wordsToVars 'show showVars <> (zipWith (name2Var 'show) [0::Int ..] patVars)
+      wordsToVars 'show showVars <> zipWith (name2Var 'show) [0 :: Int ..] patVars
 
-    name2Var f 0 vn = [| $(varE f) $(varE vn) |]
+    name2Var f 0 vn = [| $(lift . unrefine $ tmf ^. #entrySeparator) <> $(varE f) $(varE vn) |]
     name2Var f _ vn = [| " " <> $(varE f) $(varE vn) |]
 
     wordsToVars f vss = fmap go (varNamesFromPat vss)

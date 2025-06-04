@@ -23,7 +23,7 @@ unit_sum1_a_tg_u :: IO ()
 unit_sum1_a_tg_u = withPrefixEnvVar thresholdConfig "" $ sum1 one @=? 1
 
 sum2 :: (Show a, Num a) => a -> a -> a
-sum2 $a $a | $tg = $u
+sum2 $a $a | $(tg' "sum2/") = $u
 sum2 a1 a2 = a1 + a2
 
 unit_sum2_a_tg_u :: IO ()
