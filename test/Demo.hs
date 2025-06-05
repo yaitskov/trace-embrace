@@ -1,4 +1,3 @@
-{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE CPP #-}
 -- | File combines samples which are important for FileIndex
 -- such us top functions, method instances and default methods
@@ -6,6 +5,7 @@ module Demo where
 
 #if !MIN_VERSION_base(4,8,0)
 #endif
+
 
 
 (***) :: Int -> Int -> Int

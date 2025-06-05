@@ -346,27 +346,44 @@ tested-with:
   GHC == 9.10.1, GHC == 9.12.2
 extra-doc-files:
   changelog.md
-library
+
+common base
+  ghc-options: -Wall
+  default-language: GHC2024
+  default-extensions:
+    DefaultSignatures
+    DuplicateRecordFields
+    FunctionalDependencies
+    MagicHash
+    OverloadedLabels
+    TemplateHaskell
+    TypeFamilyDependencies
   build-depends:
     aeson < 3,
     base < 5,
     bytestring >= 0.11 && < 0.12.3,
     containers < 0.9,
-    cpphs < 2,
-    deepseq < 1.8,
     directory < 2,
     lens < 6,
     lrucache < 1.3,
     generic-lens < 3,
+    refined < 1,
+    template-haskell < 2.24,
+    text < 3,
+    yaml < 0.12
+
+library
+  import: base
+  hs-source-dirs: src
+  build-depends:
+    cpphs < 2,
+    deepseq < 1.8,
     ghc < 9.13,
     haddock-use-refs < 2,
     radix-tree < 2,
-    refined < 1,
     tagged < 1,
-    template-haskell < 2.24,
-    text < 3,
-    transformers < 1,
-    yaml < 0.12,
+    transformers < 1
+
   exposed-modules:
     Debug.TraceEmbrace
     Debug.TraceEmbrace.ByteString
@@ -385,31 +402,26 @@ library
     Debug.TraceEmbrace.ShowTh
     Debug.TraceEmbrace.TH
 
-  ghc-options: -Wall
-  hs-source-dirs: src
-  default-language: Haskell2010
-  default-extensions:
-    BangPatterns
-    DataKinds
-    DeriveGeneric
-    DeriveLift
-    DisambiguateRecordFields
-    DuplicateRecordFields
-    FlexibleContexts
-    FlexibleInstances
-    ImportQualifiedPost
-    LambdaCase
-    MultiParamTypeClasses
-    OverloadedLabels
-    ScopedTypeVariables
-    StandaloneDeriving
-    TemplateHaskell
-    TypeApplications
-    TypeFamilies
-
 test-suite test
+  import: base
   type: exitcode-stdio-1.0
   main-is: Driver.hs
+  default-extensions:
+    RecordWildCards
+  autogen-modules:
+    Paths_trace_embrace
+  hs-source-dirs:
+    test
+  ghc-options: -Wall -rtsopts -threaded -main-is Driver
+  build-depends:
+    , filepath < 1.6
+    , tasty
+    , tasty-discover
+    , tasty-hunit
+    , tasty-quickcheck
+    , temporary < 1.5
+    , th-lock < 1
+    , trace-embrace
   other-modules:
     Debug.TraceEmbrace.Test.TraceEmbrace.Config
     Debug.TraceEmbrace.Test.TraceEmbrace.DemoIndex
@@ -425,44 +437,6 @@ test-suite test
     Demo
     Discovery
     Paths_trace_embrace
-  autogen-modules:
-    Paths_trace_embrace
-  hs-source-dirs:
-    test
-  default-extensions:
-    BangPatterns
-    DisambiguateRecordFields
-    DuplicateRecordFields
-    FlexibleContexts
-    ImportQualifiedPost
-    LambdaCase
-    NamedFieldPuns
-    OverloadedLabels
-    RecordWildCards
-    ScopedTypeVariables
-    TemplateHaskell
-  ghc-options: -Wall -rtsopts -threaded -main-is Driver
-  build-depends:
-      base
-    , bytestring
-    , containers
-    , directory
-    , filepath < 1.6
-    , generic-lens
-    , lens
-    , lrucache < 1.3
-    , refined
-    , tasty
-    , tasty-discover
-    , tasty-hunit
-    , tasty-quickcheck
-    , template-haskell
-    , temporary < 1.5
-    , text
-    , th-lock < 1
-    , trace-embrace
-    , yaml
-  default-language: Haskell2010
 
 source-repository head
   type:     git

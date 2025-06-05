@@ -1,4 +1,3 @@
-{-# LANGUAGE PolyKinds #-}
 module Debug.TraceEmbrace.Config.Validation where
 
 import Data.Functor.Identity

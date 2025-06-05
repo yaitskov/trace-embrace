@@ -1,7 +1,3 @@
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE UnboxedSums #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedNewtypes #-}

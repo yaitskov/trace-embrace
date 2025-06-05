@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveLift #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Debug.TraceEmbrace.Config.Type.Mode where
 

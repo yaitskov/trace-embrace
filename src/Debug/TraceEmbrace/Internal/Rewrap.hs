@@ -1,7 +1,3 @@
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE FunctionalDependencies #-}
 
 module Debug.TraceEmbrace.Internal.Rewrap where
 
