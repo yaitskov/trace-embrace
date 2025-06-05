@@ -348,24 +348,24 @@ extra-doc-files:
   changelog.md
 library
   build-depends:
-    aeson < 3.0,
+    aeson < 3,
     base < 5,
-    bytestring > 0.11 && < 0.12.3,
+    bytestring >= 0.11 && < 0.12.3,
     containers < 0.9,
-    cpphs < 2.0,
+    cpphs < 2,
     deepseq < 1.8,
-    directory < 2.0,
-    lens < 6.0,
+    directory < 2,
+    lens < 6,
     lrucache < 1.3,
-    generic-lens < 3.0,
+    generic-lens < 3,
     ghc < 9.13,
-    haddock-use-refs < 2.0,
-    radix-tree < 2.0,
-    refined < 1.0,
-    tagged < 1.0,
-    template-haskell < 2.24.0.0,
-    text < 3.0,
-    transformers < 1.0,
+    haddock-use-refs < 2,
+    radix-tree < 2,
+    refined < 1,
+    tagged < 1,
+    template-haskell < 2.24,
+    text < 3,
+    transformers < 1,
     yaml < 0.12,
   exposed-modules:
     Debug.TraceEmbrace
@@ -459,7 +459,7 @@ test-suite test
     , template-haskell
     , temporary < 1.5
     , text
-    , th-lock < 1.0.0
+    , th-lock < 1
     , trace-embrace
     , yaml
   default-language: Haskell2010
