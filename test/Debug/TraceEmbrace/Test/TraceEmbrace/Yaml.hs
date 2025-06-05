@@ -2,11 +2,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Debug.TraceEmbrace.Test.TraceEmbrace.Yaml where
 
-import Data.Text
-import Data.Yaml as Y
+import Data.Text (Text, pack)
+import Data.Yaml as Y ( decodeEither', encode )
 import Debug.TraceEmbrace.Config.Type.Level
 import Test.Tasty.HUnit ((@=?))
 import Test.Tasty.QuickCheck
+    ( Arbitrary(arbitrary),
+      UnicodeString(getUnicodeString),
+      arbitraryBoundedEnum )
 
 instance Arbitrary TraceLevel where
   arbitrary = arbitraryBoundedEnum

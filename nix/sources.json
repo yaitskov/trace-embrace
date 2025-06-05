@@ -3,10 +3,10 @@
         "branch": "master",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e7a98efedcc1d0a2a8455580c562b20718c36444",
-        "sha256": "sha256:0pcvllrvnbr2s1sfc8gizz864b1wwz9mac3ri3fmkrxvajwlmmdd",
+        "rev": "da5af46a09eeb2b1c8f4193d626727d5b7460601",
+        "sha256": "sha256:0pcvllrvnbr2s1sfc8gizz864b1wwz9mac3ri3fmkrxvajwlmmff",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/e7a98efedcc1d0a2a8455580c562b20718c36444.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/da5af46a09eeb2b1c8f4193d626727d5b7460601.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "upload-doc-to-hackage": {

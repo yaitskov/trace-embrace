@@ -1,5 +1,8 @@
 # trace-embrace changelog
 
+## Version 1.2.0 2025-06-05
+  * support GHC-9.12.2
+
 ## Version 1.1.0 2025-06-04
   * add `a`, `u` and `tg` for tracing guarded functions
 

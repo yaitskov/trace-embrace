@@ -2,7 +2,7 @@
     "nixpkgs": {
         "branch": "master",
         "repo": "/home/dan/pro/nixpkgs",
-        "rev": "e7a98efedcc1d0a2a8455580c562b20718c36444",
+        "rev": "da5af46a09eeb2b1c8f4193d626727d5b7460601",
         "type": "git"
     },
     "upload-doc-to-hackage": {

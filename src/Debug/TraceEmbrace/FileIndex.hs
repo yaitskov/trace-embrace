@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -8,25 +9,40 @@
 module Debug.TraceEmbrace.FileIndex where
 
 import Data.IntMap.Strict qualified as IM
-import Data.String
-import GHC.Data.Bag
-import GHC.Data.FastString
-import GHC.Data.StringBuffer
-import GHC.Driver.Config.Parser
-import GHC.Driver.DynFlags
-import GHC.Parser
-import GHC.Parser.Annotation
-import GHC.Parser.Lexer hiding (buffer)
-import GHC.Tc.Types
-import GHC.Types.Name hiding (Name)
-import GHC.Types.Name.Reader
+import Data.String ( IsString )
+import GHC.Data.FastString ( mkFastString )
+import GHC.Data.StringBuffer ( stringToStringBuffer )
+import GHC.Driver.Config.Parser ( initParserOpts )
+import GHC.Driver.DynFlags ( HasDynFlags(..) )
+import GHC.Exts (IsList (toList))
+import GHC.Hs.Extension (GhcPs)
+import GHC.Parser ( parseModule )
+import GHC.Parser.Lexer
+    ( ParserOpts,
+      P(unP),
+      ParseResult(..),
+      getPsErrorMessages,
+      initParserState )
+import GHC.Tc.Types ( TcM )
+import GHC.Types.Name ( occNameString )
+import GHC.Types.Name.Reader ( RdrName(Unqual) )
 import GHC.Types.SrcLoc
-import GHC.Utils.Outputable hiding ((<>))
+    ( GenLocated(L), mkRealSrcLoc, realSrcSpanStart, srcLocLine )
+import GHC.Utils.Outputable
+    ( Outputable(ppr), defaultSDocContext, renderWithContext )
 import Language.Haskell.Syntax
 import Language.Haskell.TH.Syntax (Q (..), runIO, getQ, putQ, Loc (..), Lift, reportWarning)
 import Language.Preprocessor.Cpphs (runCpphs, defaultCpphsOptions)
-import Unsafe.Coerce
+import Unsafe.Coerce ( unsafeCoerce )
 
+#if MIN_VERSION_base(4,21,0)
+import GHC.Parser.Annotation (epaLocationRealSrcSpan, SrcSpanAnnA, EpAnn(entry, EpAnn) )
+#else
+import GHC.Parser.Annotation (anchor, SrcSpanAnnA, EpAnn(entry, EpAnn))
+import GHC.Types.SrcLoc (EpaLocation', RealSrcSpan)
+epaLocationRealSrcSpan :: EpaLocation' a -> RealSrcSpan
+epaLocationRealSrcSpan = anchor
+#endif
 
 newtype FunName = FunName { unFunName :: String } deriving (Show, Eq, Ord, IsString, Lift)
 type LineFileIndex = IM.IntMap FunName
@@ -46,6 +62,17 @@ getLineFileIndex' fp = getQ >>= maybe (calret putQ =<< mkLineFunIndex fp) pure
 getLineFileIndex :: Loc -> Q LineFileIndex
 getLineFileIndex = getLineFileIndex' . loc_filename
 
+indexEntry :: EpAnn ann -> GenLocated l RdrName -> [(Int, FunName)]
+indexEntry EpAnn {entry} = \case
+  L _ fi ->
+    case fi of
+      Unqual s ->
+          [ ( srcLocLine (realSrcSpanStart (epaLocationRealSrcSpan entry))
+            , FunName $ occNameString s
+            )
+          ]
+      _ -> []
+
 mkLineFunIndex :: FilePath -> Q LineFileIndex
 mkLineFunIndex fp = do
   fileContent <- runIO (runCpphs defaultCpphsOptions fp =<< readFile fp)
@@ -60,26 +87,15 @@ mkLineFunIndex fp = do
         "\n--------------------------------------------------------------------"
       pure mempty
   where
-    indexEntry EpAnn {entry} = \case
-      L _ fi ->
-        case fi of
-          Unqual s ->
-              [ ( srcLocLine (realSrcSpanStart (anchor entry))
-                , FunName $ occNameString s
-                )
-              ]
-          _ -> []
-
     methodExtract (L l (FunBind {fun_id})) = indexEntry l fun_id
     methodExtract _ = []
-
+    extract :: GenLocated SrcSpanAnnA (HsDecl GhcPs) -> [(IM.Key, FunName)]
     extract (L l (ValD _ (FunBind {fun_id}))) = indexEntry l fun_id
     extract (L _ (InstD _ (ClsInstD {cid_inst}))) =
       case cid_inst of
-        ClsInstDecl {cid_binds} -> concatMap methodExtract (bagToList cid_binds)
-        _ -> []
+        ClsInstDecl {cid_binds} -> concatMap methodExtract (toList cid_binds)
     extract (L _ (TyClD _ (ClassDecl {tcdMeths}))) =
-      concatMap methodExtract (bagToList tcdMeths)
+      concatMap methodExtract (toList tcdMeths)
     extract _ = []
 
 runParser :: FilePath -> ParserOpts -> String -> P a -> ParseResult a

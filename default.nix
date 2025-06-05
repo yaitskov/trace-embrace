@@ -1,5 +1,5 @@
 { system ? builtins.currentSystem or "x86_64-linux"
-, ghc ? "ghc9101"
+, ghc ? "ghc9122"
 }:
 
 let
@@ -13,7 +13,6 @@ let
 
   inherit (pkgs) lib;
 
-  # haUp = pkgs.callPackage /home/dan/pro/script/upload-doc-to-hackage {};
   hsPkgSetOverlay = pkgs.callPackage ./nix/haskell/overlay.nix {
     inherit (nix) sources;
   };
